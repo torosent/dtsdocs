@@ -18,19 +18,14 @@ This section covers the fundamental concepts you need to understand when working
 
 Azure Durable orchestrations are built around four core function types:
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                        DURABLE APPLICATION                           │
-│                                                                      │
-│   ┌──────────┐     ┌────────────────┐     ┌──────────────────┐      │
-│   │  CLIENT  │────▶│  ORCHESTRATOR  │────▶│    ACTIVITY      │      │
-│   └──────────┘     └────────────────┘     └──────────────────┘      │
-│        │                   │                                         │
-│        │                   ▼                                         │
-│        │           ┌──────────────────┐                              │
-│        └──────────▶│     ENTITY       │                              │
-│                    └──────────────────┘                              │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    subgraph DA [DURABLE APPLICATION]
+        C[CLIENT] --> O[ORCHESTRATOR]
+        O --> A[ACTIVITY]
+        C --> E[ENTITY]
+        O --> E
+    end
 ```
 
 | Function Type | Purpose |
@@ -46,22 +41,24 @@ Azure Durable orchestrations are built around four core function types:
 
 Behind the scenes, all Azure Durable orchestrations are powered by the **Durable Task Framework** — an open-source library originally developed by Microsoft for building reliable workflows in code.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    DURABLE TASK FRAMEWORK                       │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  Orchestration Engine                                    │   │
-│  │  ├── Event Sourcing                                      │   │
-│  │  ├── Replay-based Execution                              │   │
-│  │  └── Durable Timers                                      │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  Storage Backend                                         │   │
-│  │  ├── Durable Task Scheduler (recommended)                │   │
-│  │  ├── Azure Storage                                       │   │
-│  │  └── MSSQL                                               │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph DTF [DURABLE TASK FRAMEWORK]
+        subgraph OE [Orchestration Engine]
+            direction TB
+            OE1[Event Sourcing]
+            OE2[Replay-based Execution]
+            OE3[Durable Timers]
+            OE1 ~~~ OE2 ~~~ OE3
+        end
+        subgraph SB [Storage Backend]
+            direction TB
+            SB1[Durable Task Scheduler recommended]
+            SB2[Azure Storage]
+            SB3[MSSQL]
+            SB1 ~~~ SB2 ~~~ SB3
+        end
+    end
 ```
 
 ### Key Principles
@@ -81,21 +78,18 @@ A **task hub** is a logical container for orchestration and entity instances. Th
 - Provides isolation between different workloads
 - Enables separate monitoring and access control
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                         SCHEDULER                                │
-│  ┌─────────────────────┐  ┌─────────────────────┐               │
-│  │    Task Hub: Dev    │  │   Task Hub: Prod    │               │
-│  │  ┌───────────────┐  │  │  ┌───────────────┐  │               │
-│  │  │ Orchestration │  │  │  │ Orchestration │  │               │
-│  │  │   Instance 1  │  │  │  │   Instance A  │  │               │
-│  │  └───────────────┘  │  │  └───────────────┘  │               │
-│  │  ┌───────────────┐  │  │  ┌───────────────┐  │               │
-│  │  │ Orchestration │  │  │  │ Orchestration │  │               │
-│  │  │   Instance 2  │  │  │  │   Instance B  │  │               │
-│  │  └───────────────┘  │  │  └───────────────┘  │               │
-│  └─────────────────────┘  └─────────────────────┘               │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph S [SCHEDULER]
+        subgraph TH1 [Task Hub: Dev]
+            I1[Orchestration Instance 1]
+            I2[Orchestration Instance 2]
+        end
+        subgraph TH2 [Task Hub: Prod]
+            IA[Orchestration Instance A]
+            IB[Orchestration Instance B]
+        end
+    end
 ```
 
 ### Common Task Hub Strategies
@@ -110,26 +104,16 @@ A **task hub** is a logical container for orchestration and entity instances. Th
 
 Every orchestration instance goes through a defined lifecycle:
 
-```
-     ┌─────────┐
-     │ Pending │ ◄─── Client schedules new instance
-     └────┬────┘
-          │
-          ▼
-     ┌─────────┐
-     │ Running │ ◄─── Orchestrator code is executing
-     └────┬────┘
-          │
-    ┌─────┴─────┐
-    ▼           ▼
-┌────────┐  ┌────────┐
-│Suspended│  │Completed│
-└────────┘  └────────┘
-    │           │
-    ▼           │
-┌────────┐      │
-│Terminated│◄───┘
-└────────┘
+```mermaid
+stateDiagram-v2
+    Pending --> Running: Client schedules new instance
+    Running --> Suspended
+    Running --> Completed
+    
+    note right of Running: Orchestrator code is executing
+    
+    Suspended --> Terminated
+    Completed --> Terminated
 ```
 
 | State | Description |
