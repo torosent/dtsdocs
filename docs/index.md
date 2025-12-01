@@ -1,8 +1,7 @@
 # Azure Durable Documentation
 
-Welcome to the unified documentation for **Azure Durable** — Microsoft's comprehensive platform for building reliable, stateful orchestrations in the cloud.
-
-Build **fault-tolerant workflows** that automatically handle failures, retries, and state persistence. Whether you're building serverless applications with Azure Functions or containerized workloads on Kubernetes, Azure Durable provides the tools and infrastructure you need to succeed.
+Build workflows that never fail. Azure Durable automatically handles retries, state persistence, and crash recovery—so you can focus on your business logic.
+{: .fs-6 .fw-300 }
 
 ---
 
@@ -20,7 +19,7 @@ Build **fault-tolerant workflows** that automatically handle failures, retries, 
 
 ## What is Azure Durable?
 
-Azure Durable is an umbrella term for Microsoft's durable execution platform, which includes:
+Azure Durable is Microsoft's durable execution platform:
 
 | Component | Description | Best For |
 |-----------|-------------|----------|
@@ -35,34 +34,12 @@ Azure Durable is an umbrella term for Microsoft's durable execution platform, wh
 | I want to... | Go to... |
 |--------------|----------|
 | **Understand the concepts** | [📘 Core Concepts](./concepts/index.md) |
-| **Build serverless workflows** | [⚡ Durable Functions](./durable-functions/overview.md) |
-| **Run on containers/Kubernetes** | [🔧 Durable Task SDKs](./sdks/overview.md) |
+| **Build serverless workflows** | [⚡ Durable Functions Quickstart](./durable-functions/quickstart.md) |
+| **Run on containers/Kubernetes** | [🔧 SDK Quickstart](./sdks/quickstart.md) |
 | **Learn orchestration patterns** | [🔄 Patterns](./patterns/index.md) |
 | **Choose the right approach** | [⚖️ When to Use What](./comparison/when-to-use.md) |
 | **Set up the managed backend** | [☁️ Durable Task Scheduler](./durable-task-scheduler/overview.md) |
-
----
-
-### 📘 [Concepts](./concepts/index.md)
-Understand the core concepts behind durable orchestrations, including orchestrators, activities, entities, and state management.
-
-### 🔧 [SDKs](./sdks/overview.md)
-Explore the Durable Task SDKs for .NET, Python, and Java — portable libraries for running orchestrations anywhere.
-
-### 🔄 [Patterns](./patterns/index.md)
-Learn common orchestration patterns like function chaining, fan-out/fan-in, human interaction, and more.
-
-### 📂 [Samples](./sdks/samples.md)
-Get started with practical, language-specific code examples for .NET, Python, and Java.
-
-### 🏗️ [Architecture Guides](./architecture/index.md)
-Understand how to architect your applications using Durable Functions and Durable Task SDKs with the Durable Task Scheduler.
-
-### ⚖️ [When to Use What](./comparison/when-to-use.md)
-Guidance on choosing between Durable Functions and Durable Task SDKs based on your requirements.
-
-### ✅ [Advantages of Durable Task Scheduler](./comparison/advantages.md)
-Learn why the Durable Task Scheduler is the recommended backend for production workloads.
+| **Look up terminology** | [📖 Glossary](./glossary.md) |
 
 ---
 
@@ -136,62 +113,15 @@ pip install durabletask-azure
 
 ---
 
-## Documentation Structure
-
-```
-docs/
-├── index.md                    # This file
-├── concepts/                   # Core concepts (shared across all platforms)
-│   ├── orchestrators.md
-│   ├── activities.md
-│   ├── entities.md
-│   └── state-management.md
-├── durable-functions/          # Azure Durable Functions (serverless)
-│   ├── overview.md
-│   ├── quickstart.md
-│   └── programming-model.md
-├── durable-task-scheduler/     # Managed backend service
-│   ├── overview.md
-│   ├── setup.md
-│   ├── dashboard.md
-│   └── identity.md
-├── sdks/                       # Durable Task SDKs (portable)
-│   ├── overview.md
-│   ├── quickstart.md
-│   ├── dotnet.md
-│   ├── python.md
-│   ├── java.md
-│   └── samples.md
-├── patterns/                   # Orchestration patterns
-│   ├── function-chaining.md
-│   ├── fan-out-fan-in.md
-│   ├── human-interaction.md
-│   └── external-events.md
-├── architecture/               # Deployment guides
-│   ├── durable-functions-dts.md
-│   ├── aca-dts.md
-│   └── aks-dts.md
-└── comparison/                 # Decision guides
-    ├── when-to-use.md
-    └── advantages.md
-```
-
----
-
 ## Related Resources
 
 - [Azure Durable Functions Documentation (Microsoft Learn)](https://learn.microsoft.com/azure/azure-functions/durable/)
 - [Durable Task Scheduler Documentation (Microsoft Learn)](https://learn.microsoft.com/azure/azure-functions/durable/durable-task-scheduler/)
 - [Durable Task SDK for .NET (GitHub)](https://github.com/microsoft/durabletask-dotnet)
 - [Durable Task Samples (GitHub)](https://github.com/Azure-Samples/Durable-Task-Scheduler)
-- [Durable Task Framework (GitHub)](https://github.com/Azure/durabletask)
 
 ---
 
 ## Feedback
 
 Found an issue or have a suggestion? [Open an issue on GitHub](https://github.com/Azure/durabletask/issues).
-
----
-
-*Last updated: December 2025*

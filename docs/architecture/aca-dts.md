@@ -403,3 +403,53 @@ curl https://$API_URL/orders/<instanceId>
 - [Configure Identity →](../durable-task-scheduler/identity.md)
 - [Use the Dashboard →](../durable-task-scheduler/dashboard.md)
 - [Implement Patterns →](../patterns/index.md)
+
+---
+
+## Troubleshooting
+
+| Issue | Possible Cause | Solution |
+|-------|---------------|----------|
+| Container fails to start | Missing environment variables | Verify `DTS_ENDPOINT` and `TASKHUB_NAME` are set correctly in `--env-vars` |
+| `403 Forbidden` connecting to Scheduler | Missing role assignment | Ensure managed identity has "Durable Task Data Contributor" role on the Scheduler |
+| `ImagePullBackOff` error | ACR permissions | Verify identity has "AcrPull" role; check registry server URL |
+| Orchestrations not processing | Worker not connected | Check worker logs with `az containerapp logs show`; verify gRPC connectivity |
+| High latency/timeouts | Wrong region | Deploy Container Apps in same region as Durable Task Scheduler |
+| Scaling not working | KEDA misconfiguration | Verify scale rules and authentication; check KEDA operator logs |
+
+**Debugging Commands:**
+
+```bash
+# View worker logs
+az containerapp logs show \
+  --name durable-worker \
+  --resource-group $RESOURCE_GROUP \
+  --follow
+
+# Check container app status
+az containerapp show \
+  --name durable-worker \
+  --resource-group $RESOURCE_GROUP \
+  --query "properties.runningStatus"
+
+# Verify managed identity assignment
+az containerapp identity show \
+  --name durable-worker \
+  --resource-group $RESOURCE_GROUP
+
+# Test Scheduler connectivity from local machine
+curl -v https://$SCHEDULER_NAME.$LOCATION.durabletask.io
+
+# View revision status (for deployment issues)
+az containerapp revision list \
+  --name durable-worker \
+  --resource-group $RESOURCE_GROUP \
+  --output table
+```
+
+**Common Configuration Mistakes:**
+
+1. **Endpoint format**: Use `https://` prefix for DTS_ENDPOINT (not `http://`)
+2. **Task hub case sensitivity**: Task hub names are case-sensitive
+3. **Identity propagation delay**: Wait 1-2 minutes after role assignment before testing
+4. **Min replicas**: Set `--min-replicas 1` for workers to ensure always-on processing

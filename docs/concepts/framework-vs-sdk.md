@@ -1,8 +1,9 @@
 ---
 layout: default
 title: Framework vs SDKs
-parent: Concepts
-nav_order: 10
+parent: Core Concepts
+nav_order: 15
+permalink: /docs/concepts/framework-vs-sdk/
 ---
 
 # Durable Task Framework vs. Durable Task SDKs

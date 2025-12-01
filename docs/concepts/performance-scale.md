@@ -2,12 +2,14 @@
 layout: default
 title: Performance & Scale
 parent: Core Concepts
-nav_order: 9
+nav_order: 20
 permalink: /docs/concepts/performance-scale/
 ---
 
 # Performance and Scale
 {: .no_toc }
+
+> **Note**: This article has been superseded by [Distributed Execution](./distributed-execution.md) which provides backend-agnostic guidance on scaling, partitioning, and high availability.
 
 ## Table of contents
 {: .no_toc .text-delta }

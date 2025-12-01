@@ -32,11 +32,14 @@ Guidance for choosing the right approach for your durable orchestration needs.
 |:------|:------------|
 | [When to Use What](when-to-use/) | Complete decision guide for choosing your approach |
 | [Advantages of DTS](advantages/) | Benefits of the Durable Task Scheduler over other backends |
+| [Comparison with Alternatives](alternatives/) | How Azure Durable compares to Temporal, Step Functions, Airflow |
+| [Real-World Use Cases](use-cases/) | Industry examples: e-commerce, healthcare, finance, IoT, media |
 
 ---
 
 ## Need Help Deciding?
 
 1. **Start with [When to Use What](when-to-use/)** — Comprehensive decision flowcharts
-2. **Review [Architecture Guides](../architecture/index.md)** — Deployment patterns for each platform
-3. **Understand the [Core Concepts](../concepts/index.md)** — Shared concepts across all approaches
+2. **See [Real-World Use Cases](use-cases/)** — Learn from practical examples
+3. **Compare [Alternatives](alternatives/)** — Evaluate against Temporal, AWS Step Functions, etc.
+4. **Review [Architecture Guides](../architecture/index.md)** — Deployment patterns for each platform

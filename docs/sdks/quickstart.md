@@ -138,10 +138,26 @@ public class HelloCitiesOrchestrator : TaskOrchestrator<string?, string>
         string? input)
     {
         var results = new List<string>();
+        var cities = new[] { "Tokyo", "London", "Seattle" };
         
-        results.Add(await context.CallActivityAsync<string>(nameof(SayHelloActivity), "Tokyo"));
-        results.Add(await context.CallActivityAsync<string>(nameof(SayHelloActivity), "London"));
-        results.Add(await context.CallActivityAsync<string>(nameof(SayHelloActivity), "Seattle"));
+        foreach (var city in cities)
+        {
+            try
+            {
+                var greeting = await context.CallActivityAsync<string>(
+                    nameof(SayHelloActivity), 
+                    city
+                );
+                results.Add(greeting);
+            }
+            catch (TaskFailedException ex)
+            {
+                // Log the failure and continue with remaining cities
+                context.CreateReplaySafeLogger<HelloCitiesOrchestrator>()
+                    .LogWarning("Failed to greet {City}: {Error}", city, ex.Message);
+                results.Add($"Failed to greet {city}");
+            }
+        }
         
         return string.Join(" ", results);
     }
@@ -228,9 +244,17 @@ from durabletask.azuremanaged.client import DurableTaskSchedulerClient
 @task.orchestrator
 def hello_cities(ctx: task.OrchestrationContext, _: None):
     results = []
-    results.append(yield ctx.call_activity("say_hello", input="Tokyo"))
-    results.append(yield ctx.call_activity("say_hello", input="London"))
-    results.append(yield ctx.call_activity("say_hello", input="Seattle"))
+    cities = ["Tokyo", "London", "Seattle"]
+    
+    for city in cities:
+        try:
+            greeting = yield ctx.call_activity("say_hello", input=city)
+            results.append(greeting)
+        except Exception as e:
+            # Log the failure and continue with remaining cities
+            print(f"Failed to greet {city}: {e}")
+            results.append(f"Failed to greet {city}")
+    
     return " ".join(results)
 
 @task.activity
@@ -276,3 +300,41 @@ asyncio.run(main())
 - [Explore the Java SDK →](./java.md)
 - [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
 - [Explore Orchestration Patterns →](../patterns/index.md)
+
+---
+
+## Troubleshooting
+
+| Issue | Possible Cause | Solution |
+|-------|---------------|----------|
+| `Connection refused` on port 8080 | Emulator not running | Run the Docker command from Step 1 and verify with `docker ps` |
+| `Failed to connect to all addresses` | gRPC connection issue | Ensure firewall allows ports 8080/8082; try `http://127.0.0.1:8080` instead of localhost |
+| Dashboard shows no orchestrations | Wrong task hub name | Verify `taskHub` value matches in all configuration locations |
+| Orchestration stuck in "Running" | Worker crashed or disconnected | Check worker logs; restart the application |
+| `Package not found` errors | Missing NuGet sources | Run `dotnet nuget list source` and ensure nuget.org is configured |
+| Python `ModuleNotFoundError` | Package not installed | Run `pip install durabletask-azure` in your virtual environment |
+
+**Debugging Tips:**
+
+1. **Check emulator status:**
+   ```bash
+   docker logs $(docker ps -q --filter ancestor=mcr.microsoft.com/dts/dts-emulator:latest)
+   ```
+
+2. **Verify gRPC connectivity:**
+   ```bash
+   curl -v http://localhost:8080
+   ```
+
+3. **Enable verbose logging (.NET):**
+   ```csharp
+   builder.Logging.SetMinimumLevel(LogLevel.Debug);
+   ```
+
+4. **Enable verbose logging (Python):**
+   ```python
+   import logging
+   logging.basicConfig(level=logging.DEBUG)
+   ```
+
+5. **View orchestration history in dashboard:** Navigate to `http://localhost:8082`, click on your orchestration instance, and inspect the execution timeline for failed activities.

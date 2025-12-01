@@ -2,7 +2,7 @@
 layout: default
 title: Entity Functions
 parent: Core Concepts
-nav_order: 3
+nav_order: 5
 permalink: /docs/concepts/entities/
 ---
 

@@ -305,8 +305,9 @@ Built for production workloads.
   "extensions": {
     "durableTask": {
       "storageProvider": {
-        "type": "azureManaged",
-        "connectionStringName": "DurableTaskSchedulerConnection"
+        "type": "durabletaskscheduler",
+        "connectionStringName": "DURABLE_TASK_SCHEDULER_CONNECTION_STRING",
+        "taskHubName": "%TASKHUB_NAME%"
       }
     }
   }

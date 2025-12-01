@@ -2,7 +2,7 @@
 layout: default
 title: Task Hubs
 parent: Core Concepts
-nav_order: 6
+nav_order: 9
 permalink: /docs/concepts/task-hubs/
 ---
 

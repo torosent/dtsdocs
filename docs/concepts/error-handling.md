@@ -2,7 +2,7 @@
 layout: default
 title: Error Handling
 parent: Core Concepts
-nav_order: 5
+nav_order: 7
 permalink: /docs/concepts/error-handling/
 ---
 

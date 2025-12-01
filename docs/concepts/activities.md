@@ -2,7 +2,7 @@
 layout: default
 title: Activity Functions
 parent: Core Concepts
-nav_order: 2
+nav_order: 3
 permalink: /docs/concepts/activities/
 ---
 

@@ -2,7 +2,7 @@
 layout: default
 title: State Management
 parent: Core Concepts
-nav_order: 4
+nav_order: 12
 permalink: /docs/concepts/state-management/
 ---
 

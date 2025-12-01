@@ -19,81 +19,130 @@ The documentation is organized into the following logical sections:
 
 ### 1. Core Concepts (`docs/concepts/`)
 **The "What"**
-*   **Content**: Orchestrators, Activities, Entities, State Management, Error Handling, Versioning.
+*   **Content**: Orchestrators, Activities, Entities, State Management, Error Handling, Versioning, Task Hubs, Code Constraints, and more.
 *   **Reasoning**: Users often struggle with the "magic" of replay history or the constraints of deterministic code. Defining these once creates a shared vocabulary for both DF and SDK users.
 
 ### 2. Azure Durable Functions (`docs/durable-functions/`)
 **The "Serverless Path"**
-*   **Content**: Overview, Storage Providers (Azure Storage, MSSQL, Netherite), Triggers & Bindings.
-*   **Reasoning**: This section focuses on the Azure Functions extension. It includes storage provider configuration because DF offers the unique flexibility of "Bring Your Own Backend" (Azure Storage, MSSQL, etc.), unlike the SDKs which primarily target DTS.
+*   **Content**: Overview, Quickstart, Programming Model, Storage Providers, Samples.
+*   **Reasoning**: This section focuses on the Azure Functions extension. It includes storage provider configuration because DF offers the unique flexibility of "Bring Your Own Backend" (Azure Storage, MSSQL, Netherite, DTS), unlike the SDKs which primarily target DTS.
 
 ### 3. Durable Task SDKs (`docs/sdks/`)
 **The "Portable Path"**
-*   **Content**: .NET, Python, Java client libraries.
+*   **Content**: Overview, Quickstart, .NET, Python, Java client libraries, Samples.
 *   **Reasoning**: For users running on Azure Container Apps (ACA), Kubernetes (AKS), or on-premises. This section focuses on the libraries that allow durable execution *without* the Azure Functions host.
 
 ### 4. Durable Task Scheduler (`docs/durable-task-scheduler/`)
 **The "Managed Backend"**
-*   **Content**: Setup, Dashboard, Identity, billing.
+*   **Content**: Overview, Setup, Dashboard, Identity management.
 *   **Reasoning**: DTS is a standalone Azure service. It requires its own guide for provisioning, monitoring, and security, distinct from the compute platform that connects to it.
 
 ### 5. Patterns (`docs/patterns/`)
 **The "How-To"**
-*   **Content**: Function Chaining, Fan-out/Fan-in, Async HTTP APIs, Human Interaction.
+*   **Content**: Function Chaining, Fan-out/Fan-in, Async HTTP APIs, Human Interaction, External Events, Aggregator.
 *   **Reasoning**: These patterns are the "standard library" of durable execution. Centralizing them prevents "dialect" fragmentation between languages and platforms.
 
 ### 6. Architecture (`docs/architecture/`)
 **The "Production Guide"**
-*   **Content**: DF + DTS, ACA + SDKs, AKS + SDKs.
+*   **Content**: Durable Functions + DTS, Azure Container Apps + SDKs, AKS + SDKs.
 *   **Reasoning**: Addresses "Day 2" operations. How do I deploy this? How does networking work? This bridges the gap between code and cloud infrastructure.
 
 ### 7. Comparison (`docs/comparison/`)
 **The "Decision Guide"**
-*   **Content**: When to use DF vs. SDKs? Advantages of DTS.
+*   **Content**: When to Use What, Advantages of DTS, Comparison with Alternatives (Logic Apps, Service Bus, Orleans), Real-World Use Cases.
 *   **Reasoning**: Honest, transparent guidance to help customers choose the right tool for their specific constraints (e.g., "I need VNet injection" or "I need to run on-prem").
 
-## Sections
-
-| Section | Notes |
-|:--------|:------|
-| **Concepts** | Covers all major concepts including Task Hubs, Versioning, and Framework vs SDKs. |
-| **Durable Functions** | Includes Storage Providers, Quickstart, and Programming Model. |
-| **SDKs** | Includes Language guides and Quickstart. |
-| **DTS** | Setup and Dashboard guides are in place. |
-| **Patterns** | Major patterns documented. |
-| **Architecture** | Guides for ACA, AKS, and DF. |
+### 8. Glossary (`docs/glossary.md`)
+**The "Reference"**
+*   **Content**: Definitions of key terms like Orchestrator, Activity, Checkpoint, Replay, Task Hub, etc.
+*   **Reasoning**: Quick reference for users to look up unfamiliar terminology without leaving the documentation.
 
 ## Documentation Map
 
-The following tree illustrates the file structure and the purpose of each directory:
+The following tree illustrates the complete file structure:
 
 ```text
 docs/
+├── index.md                   # Documentation landing page
+├── glossary.md                # Terminology reference
+│
 ├── concepts/                  # Shared mental model (applies to both DF and SDKs)
 │   ├── index.md               # Concept landing page
 │   ├── orchestrators.md       # Defining workflows
 │   ├── activities.md          # Performing work
 │   ├── entities.md            # Managing stateful objects
+│   ├── state-management.md    # How state is persisted
+│   ├── error-handling.md      # Retry policies and compensation
+│   ├── versioning.md          # Handling workflow changes
+│   ├── task-hubs.md           # Logical partitioning
+│   ├── code-constraints.md    # Determinism requirements
 │   ├── framework-vs-sdk.md    # Architectural comparison
-│   └── ...
+│   ├── instance-management.md # Managing orchestration instances
+│   ├── data-persistence.md    # Data storage strategies
+│   ├── distributed-execution.md # How work is distributed
+│   ├── performance-scale.md   # Scaling considerations
+│   ├── schedules.md           # Timers and scheduling
+│   ├── app-hosting.md         # Hosting options
+│   └── backend-providers.md   # Backend storage options
+│
 ├── durable-functions/         # Azure Functions extension (Serverless)
 │   ├── overview.md            # DF specific introduction
 │   ├── quickstart.md          # Create your first Durable Function
 │   ├── programming-model.md   # Triggers, bindings, and constraints
-│   └── storage-providers.md   # Configuring Azure Storage, MSSQL, Netherite
+│   ├── storage-providers.md   # Configuring Azure Storage, MSSQL, Netherite, DTS
+│   └── samples.md             # Code examples
+│
 ├── sdks/                      # Durable Task Client Libraries (Portable)
 │   ├── index.md               # SDK landing page
+│   ├── overview.md            # SDK introduction
 │   ├── quickstart.md          # Create your first portable worker
 │   ├── dotnet.md              # .NET SDK guide
+│   ├── python.md              # Python SDK guide
 │   ├── java.md                # Java SDK guide
-│   └── python.md              # Python SDK guide
+│   └── samples.md             # Code examples
+│
 ├── durable-task-scheduler/    # The managed backend service
-│   └── overview.md            # Service capabilities and setup
+│   ├── index.md               # DTS landing page
+│   ├── overview.md            # Service capabilities
+│   ├── setup.md               # Provisioning guide
+│   ├── dashboard.md           # Monitoring and debugging
+│   └── identity.md            # Authentication and authorization
+│
 ├── patterns/                  # Common architectural patterns
-│   └── index.md               # Chaining, Fan-out/in, etc.
-└── architecture/              # Production deployment guides
-    └── index.md               # Topology diagrams and networking
+│   ├── index.md               # Pattern overview
+│   ├── function-chaining.md   # Sequential workflows
+│   ├── fan-out-fan-in.md      # Parallel processing
+│   ├── async-http.md          # Long-running HTTP APIs
+│   ├── human-interaction.md   # Approval workflows
+│   ├── external-events.md     # Event-driven orchestration
+│   └── aggregator.md          # Stateful aggregation
+│
+├── architecture/              # Production deployment guides
+│   ├── index.md               # Architecture overview
+│   ├── durable-functions-dts.md # DF + DTS deployment
+│   ├── aca-dts.md             # Container Apps + SDKs
+│   └── aks-dts.md             # Kubernetes + SDKs
+│
+└── comparison/                # Decision guides
+    ├── index.md               # Comparison overview
+    ├── when-to-use.md         # DF vs SDKs decision guide
+    ├── advantages.md          # Benefits of DTS
+    ├── alternatives.md        # vs Logic Apps, Service Bus, Orleans
+    └── use-cases.md           # Real-world examples
 ```
+
+## Sections Summary
+
+| Section | Content |
+|:--------|:--------|
+| **Concepts** | 17 concept documents covering orchestrators, activities, entities, state management, error handling, versioning, task hubs, and more. |
+| **Durable Functions** | Overview, Quickstart, Programming Model, Storage Providers, and Samples. |
+| **SDKs** | Overview, Quickstart, and language-specific guides for .NET, Python, and Java. |
+| **DTS** | Overview, Setup, Dashboard, and Identity management guides. |
+| **Patterns** | 6 architectural patterns including chaining, fan-out/fan-in, and human interaction. |
+| **Architecture** | Deployment guides for Durable Functions, Container Apps, and AKS. |
+| **Comparison** | Decision guides, alternatives comparison, and real-world use cases. |
+| **Glossary** | Terminology reference for quick lookups. |
 
 ## Local Development
 

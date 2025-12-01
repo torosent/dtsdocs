@@ -395,3 +395,54 @@ jobs:
 - [View the Dashboard →](../durable-task-scheduler/dashboard.md)
 - [Configure Identity →](../durable-task-scheduler/identity.md)
 - [Explore Patterns →](../patterns/index.md)
+
+---
+
+## Troubleshooting
+
+| Issue | Possible Cause | Solution |
+|-------|---------------|----------|
+| `Unable to resolve storage provider` | Missing NuGet package | Add `Microsoft.Azure.Functions.Worker.Extensions.DurableTask.AzureManaged` package |
+| `401 Unauthorized` | Managed identity not configured | Enable system-assigned identity; assign "Durable Task Data Contributor" role |
+| Orchestration not starting | Wrong endpoint format | Ensure endpoint uses `https://` and correct region (e.g., `centralus.durabletask.io`) |
+| `TaskHub not found` | Task hub doesn't exist | Create task hub via CLI: `az durabletask taskhub create` |
+| Local debugging fails | Missing connection settings | Verify `local.settings.json` has all `DurableTaskSchedulerConnection__*` values |
+| Python import errors | Missing package | Run `pip install azure-functions-durable` |
+
+**Debugging Commands:**
+
+```bash
+# Verify scheduler exists and get endpoint
+az durabletask scheduler show \
+  --name my-scheduler \
+  --resource-group rg-durable \
+  --query "{endpoint: properties.endpoint, status: provisioningState}"
+
+# List task hubs
+az durabletask taskhub list \
+  --resource-group rg-durable \
+  --scheduler-name my-scheduler
+
+# Check Function App identity
+az functionapp identity show \
+  --name my-function-app \
+  --resource-group rg-durable
+
+# Verify role assignments on scheduler
+az role assignment list \
+  --scope $(az durabletask scheduler show -n my-scheduler -g rg-durable --query id -o tsv) \
+  --output table
+
+# View Function App logs
+az functionapp log tail \
+  --name my-function-app \
+  --resource-group rg-durable
+```
+
+**Common Configuration Mistakes:**
+
+1. **host.json type value**: Use `"type": "azureManaged"` (not `"durabletaskscheduler"` for Durable Functions)
+2. **Connection string name**: The `connectionStringName` must match your app settings prefix (e.g., `DurableTaskSchedulerConnection`)
+3. **Double underscores**: Use `__` (double underscore) in app setting names, not `:` (colon)
+4. **Missing authentication setting**: Always specify `DurableTaskSchedulerConnection__authentication` (typically `ManagedIdentity`)
+5. **Task hub case sensitivity**: Task hub names are case-sensitive; ensure exact match

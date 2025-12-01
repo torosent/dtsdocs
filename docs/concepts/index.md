@@ -193,17 +193,28 @@ public async Task<string> SafeOrchestrator(TaskOrchestrationContext context)
 
 ## In This Section
 
+### Getting Started
+- **[App Hosting](./app-hosting.md)** — Azure Functions vs Durable Task SDKs, .NET In-Process vs Isolated
 - **[Orchestrators](./orchestrators.md)** — Learn how orchestrator functions coordinate workflows
 - **[Activities](./activities.md)** — Understand how activities perform the actual work
-- **[Entities](./entities.md)** — Explore stateful entities for managing distributed state
-- **[State Management](./state-management.md)** — Deep dive into how state is persisted and recovered
-- **[Error Handling](./error-handling.md)** — Handle exceptions, retries, and compensation
-- **[Task Hubs](./task-hubs.md)** — Logical containers for isolation and management
+- **[Code Constraints](./code-constraints.md)** — Critical rules for deterministic orchestrator code
+
+### Core Features
+- **[Entities](./entities.md)** — Stateful actors for managing distributed state
 - **[Instance Management](./instance-management.md)** — Start, query, terminate, and purge instances
+- **[Error Handling](./error-handling.md)** — Handle exceptions, retries, and compensation
 - **[Versioning](./versioning.md)** — Strategies for updating orchestration code
-- **[Performance & Scale](./performance-scale.md)** — Scaling behavior and high availability
-- **[Storage Providers](../durable-functions/storage-providers.md)** — Choose the right backend (Azure Storage, MSSQL, Netherite)
-- **[Framework vs SDKs](./framework-vs-sdk.md)** — Understand the difference between the engine and the client libraries
+
+### Infrastructure
+- **[Task Hubs](./task-hubs.md)** — Logical containers for isolation and management
+- **[Backend Providers](./backend-providers.md)** — Choose the right storage backend (DTS, Azure Storage, MSSQL)
+- **[Distributed Execution](./distributed-execution.md)** — Scaling, partitioning, and high availability
+
+### Advanced Topics
+- **[State Management](./state-management.md)** — Deep dive into event sourcing and replay
+- **[Data Persistence](./data-persistence.md)** — Serialization, payload sizes, and versioning
+- **[Schedules](./schedules.md)** — Define recurring orchestrations (.NET only)
+- **[Framework vs SDKs](./framework-vs-sdk.md)** — Understand the difference between DTFx and the client libraries
 
 ---
 

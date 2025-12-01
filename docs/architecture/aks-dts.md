@@ -562,3 +562,52 @@ kubectl get hpa -n durable-system -w
 - [Configure Identity →](../durable-task-scheduler/identity.md)
 - [Use the Dashboard →](../durable-task-scheduler/dashboard.md)
 - [Implement Patterns →](../patterns/index.md)
+
+---
+
+## Troubleshooting
+
+| Issue | Possible Cause | Solution |
+|-------|---------------|----------|
+| `CreateContainerConfigError` | Missing environment variables | Check ConfigMap applied; verify `envsubst` processed variables |
+| `403 Forbidden` to Scheduler | Workload identity misconfigured | Verify federated credential matches service account namespace/name |
+| Pods stuck in `Pending` | Insufficient cluster resources | Scale node pool or reduce resource requests |
+| `CrashLoopBackOff` | Application error or missing config | Check pod logs: `kubectl logs -n durable-system <pod-name>` |
+| HPA not scaling | Metrics server issue | Verify metrics-server is running: `kubectl get pods -n kube-system` |
+| Ingress 502 errors | Service/pod not ready | Check readiness probe; verify service selector matches pod labels |
+
+**Debugging Commands:**
+
+```bash
+# View pod logs
+kubectl logs -n durable-system -l app=durable-worker --tail=100
+
+# Describe pod for events
+kubectl describe pod -n durable-system -l app=durable-worker
+
+# Check workload identity token
+kubectl exec -it -n durable-system <pod-name> -- \
+  cat /var/run/secrets/azure/tokens/azure-identity-token
+
+# Verify service account annotations
+kubectl get sa durable-worker-sa -n durable-system -o yaml
+
+# Test DNS resolution from pod
+kubectl exec -it -n durable-system <pod-name> -- \
+  nslookup $SCHEDULER_NAME.$LOCATION.durabletask.io
+
+# Check HPA status
+kubectl describe hpa durable-worker-hpa -n durable-system
+
+# View KEDA scaler logs (if using KEDA)
+kubectl logs -n keda -l app=keda-operator --tail=50
+```
+
+**Common Configuration Mistakes:**
+
+1. **Federated credential subject**: Must exactly match `system:serviceaccount:<namespace>:<service-account-name>`
+2. **Workload identity label**: Pods must have `azure.workload.identity/use: "true"` label
+3. **Service account annotation**: Must include `azure.workload.identity/client-id` annotation
+4. **ConfigMap not applied**: Run `kubectl get configmap -n durable-system` to verify
+5. **Variable substitution**: Use `envsubst` or Helm for variable replacement before applying manifests
+6. **OIDC issuer mismatch**: Federated credential issuer must match AKS cluster's OIDC issuer URL

@@ -85,10 +85,19 @@ namespace MyDurableApp
             
             var outputs = new List<string>();
 
-            // Call activities in sequence
-            outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Tokyo"));
-            outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Seattle"));
-            outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "London"));
+            try
+            {
+                // Call activities in sequence with error handling
+                outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Tokyo"));
+                outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Seattle"));
+                outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "London"));
+            }
+            catch (TaskFailedException ex)
+            {
+                // Handle activity failures gracefully
+                logger.LogError("Activity failed: {Message}", ex.Message);
+                throw; // Re-throw to mark orchestration as failed
+            }
 
             return outputs;
         }
@@ -230,6 +239,26 @@ You've created your first Durable Function! The orchestration:
 - Started via HTTP trigger
 - Called three activities in sequence
 - Returned the combined results
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Connection refused on port 8080" | Emulator not running | Run `docker run -d -p 8080:8080 -p 8082:8082 mcr.microsoft.com/dts/dts-emulator:latest` |
+| "Function app won't start" | Missing packages | Run `dotnet restore` and verify packages are installed |
+| "Orchestration stuck in Pending" | Worker not processing | Check emulator logs with `docker logs <container-id>` |
+| "Activity timeout" | Long-running activity | Increase timeout in retry policy or optimize activity |
+
+### Debugging Tips
+
+1. **Check emulator logs**: `docker logs $(docker ps -q --filter ancestor=mcr.microsoft.com/dts/dts-emulator)`
+2. **Enable verbose logging**: Add `"logging": { "logLevel": { "default": "Debug" } }` to `host.json`
+3. **Use the dashboard**: Open `http://localhost:8082` to inspect orchestration history
+4. **Check Application Insights**: In production, Application Insights provides detailed telemetry
 
 ---
 
