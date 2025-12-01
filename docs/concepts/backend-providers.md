@@ -30,27 +30,21 @@ The Durable Task Framework requires a storage backend to persist orchestration s
 | **[MSSQL](#microsoft-sql-server-mssql)** | BYO | ⚠️ Functions Only | On-premises, disconnected |
 | **[Netherite](#netherite-deprecated)** | BYO | ⚠️ Functions Only | High-throughput (deprecated) |
 
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                        BACKEND PROVIDERS                                   │
-├────────────────────────────────────────────────────────────────────────────┤
-│                                                                            │
-│   ┌─────────────────────────────────────────────────────────────────────┐ │
-│   │                  DURABLE TASK SCHEDULER (Managed)                   │ │
-│   │  • Works with Azure Functions AND Durable Task SDKs                 │ │
-│   │  • Highest performance, built-in dashboard                          │ │
-│   │  • Recommended for new projects                                     │ │
-│   └─────────────────────────────────────────────────────────────────────┘ │
-│                                                                            │
-│   ┌─────────────────────────────────────────────────────────────────────┐ │
-│   │                  BYO PROVIDERS (Azure Functions Only)               │ │
-│   │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │ │
-│   │  │ Azure Storage│  │    MSSQL     │  │  Netherite   │              │ │
-│   │  │  (Default)   │  │ (On-prem OK) │  │ (Deprecated) │              │ │
-│   │  └──────────────┘  └──────────────┘  └──────────────┘              │ │
-│   └─────────────────────────────────────────────────────────────────────┘ │
-│                                                                            │
-└────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Providers["BACKEND PROVIDERS"]
+        subgraph DTS["DURABLE TASK SCHEDULER (Managed)"]
+            D1["Works with Azure Functions AND Durable Task SDKs"]
+            D2["Highest performance, built-in dashboard"]
+            D3["Recommended for new projects"]
+        end
+        
+        subgraph BYO["BYO PROVIDERS (Azure Functions Only)"]
+            AS["Azure Storage<br/>(Default)"]
+            MS["MSSQL<br/>(On-prem OK)"]
+            NT["Netherite<br/>(Deprecated)"]
+        end
+    end
 ```
 
 > **Important**: Azure Storage, MSSQL, and Netherite backends are **only available with Azure Durable Functions**. The Durable Task SDKs only support the Durable Task Scheduler backend.
@@ -262,36 +256,15 @@ If you're using Netherite, plan your migration to the Durable Task Scheduler:
 
 ### Decision Flowchart
 
-```
-                    ┌────────────────────────┐
-                    │ Choosing a Backend?    │
-                    └───────────┬────────────┘
-                                │
-            ┌───────────────────▼───────────────────┐
-            │ Are you using Durable Task SDKs?      │
-            │ (not Azure Functions)                 │
-            └───────────────────┬───────────────────┘
-                                │
-         ┌──────────────────────┼──────────────────────┐
-         │ Yes                  │ No (Using Functions) │
-         ▼                      ▼                      │
-┌─────────────────┐   ┌─────────────────────────────┐ │
-│ Must use        │   │ Do you need on-premises     │ │
-│ Durable Task    │   │ or disconnected support?    │ │
-│ Scheduler       │   └──────────────┬──────────────┘ │
-└─────────────────┘                  │                │
-                      ┌──────────────┼──────────────┐ │
-                      │ Yes          │ No           │ │
-                      ▼              ▼              │ │
-             ┌─────────────┐  ┌───────────────────┐│ │
-             │ Use MSSQL   │  │ Use Durable Task  ││ │
-             │ Backend     │  │ Scheduler         ││ │
-             └─────────────┘  │ (Recommended)     ││ │
-                              └───────────────────┘│ │
-                                                   │ │
-                    ┌──────────────────────────────┘ │
-                    │                                │
-                    └────────────────────────────────┘
+```mermaid
+flowchart TB
+    Start["Choosing a Backend?"] --> Q1{"Are you using Durable Task SDKs?<br/>(not Azure Functions)"}
+    
+    Q1 -->|"Yes"| DTS1["Must use<br/>Durable Task<br/>Scheduler"]
+    Q1 -->|"No (Using Functions)"| Q2{"Do you need on-premises<br/>or disconnected support?"}
+    
+    Q2 -->|"Yes"| MSSQL["Use MSSQL<br/>Backend"]
+    Q2 -->|"No"| DTS2["Use Durable Task<br/>Scheduler<br/>(Recommended)"]
 ```
 
 ### Quick Recommendation

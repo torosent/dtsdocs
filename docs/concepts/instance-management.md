@@ -302,39 +302,24 @@ Response includes:
 
 ## Instance Lifecycle
 
-```
-                    INSTANCE STATES
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│    ┌─────────┐                                              │
-│    │ Pending │ ◀── ScheduleNewOrchestrationInstanceAsync    │
-│    └────┬────┘                                              │
-│         │                                                   │
-│         ▼                                                   │
-│    ┌─────────┐                                              │
-│    │ Running │ ◀── Orchestrator executing                   │
-│    └────┬────┘                                              │
-│         │                                                   │
-│    ┌────┴─────────────┬────────────────┐                    │
-│    │                  │                │                    │
-│    ▼                  ▼                ▼                    │
-│ ┌──────────┐    ┌──────────┐    ┌────────────┐             │
-│ │Completed │    │  Failed  │    │ Suspended  │             │
-│ └──────────┘    └──────────┘    └─────┬──────┘             │
-│                                       │                     │
-│                                       ▼                     │
-│                                  ResumeAsync                │
-│                                       │                     │
-│                                       ▼                     │
-│                                  ┌─────────┐                │
-│                                  │ Running │                │
-│                                  └─────────┘                │
-│                                                             │
-│    Any state ─── TerminateAsync ───▶ ┌────────────┐        │
-│                                      │ Terminated │        │
-│                                      └────────────┘        │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> Pending: ScheduleNewOrchestrationInstanceAsync
+    Pending --> Running: Orchestrator executing
+    Running --> Completed
+    Running --> Failed
+    Running --> Suspended
+    Suspended --> Running: ResumeAsync
+    
+    Completed --> [*]
+    Failed --> [*]
+    
+    Running --> Terminated: TerminateAsync
+    Pending --> Terminated: TerminateAsync
+    Suspended --> Terminated: TerminateAsync
+    Completed --> Terminated: TerminateAsync
+    Failed --> Terminated: TerminateAsync
+    Terminated --> [*]
 ```
 
 ---

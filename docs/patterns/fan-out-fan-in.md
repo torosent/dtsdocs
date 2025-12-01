@@ -25,39 +25,21 @@ Execute multiple activities in parallel and wait for all of them to complete bef
 
 The fan-out/fan-in pattern allows you to execute multiple activities concurrently and then aggregate their results. This is ideal for batch processing, parallel operations, and scenarios where work can be divided.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                       FAN-OUT / FAN-IN                            │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│                         Input (List)                              │
-│                              │                                    │
-│                              ▼                                    │
-│                    ┌─────────────────┐                           │
-│                    │   Orchestrator   │                           │
-│                    │    (Fan-Out)     │                           │
-│                    └────────┬────────┘                           │
-│                             │                                     │
-│               ┌─────────────┼─────────────┐                      │
-│               │             │             │                       │
-│               ▼             ▼             ▼                       │
-│         ┌─────────┐   ┌─────────┐   ┌─────────┐                  │
-│         │Activity │   │Activity │   │Activity │  ... N tasks     │
-│         │  Item 1 │   │  Item 2 │   │  Item 3 │                  │
-│         └────┬────┘   └────┬────┘   └────┬────┘                  │
-│              │             │             │                        │
-│              └─────────────┼─────────────┘                       │
-│                            │                                      │
-│                            ▼                                      │
-│                   ┌─────────────────┐                            │
-│                   │   Orchestrator   │                            │
-│                   │    (Fan-In)      │                            │
-│                   └────────┬────────┘                            │
-│                            │                                      │
-│                            ▼                                      │
-│                      Aggregated Result                            │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Input["Input (List)"] --> FanOut["Orchestrator<br/>(Fan-Out)"]
+    
+    FanOut --> A1["Activity<br/>Item 1"]
+    FanOut --> A2["Activity<br/>Item 2"]
+    FanOut --> A3["Activity<br/>Item 3"]
+    FanOut --> AN["... N tasks"]
+    
+    A1 --> FanIn["Orchestrator<br/>(Fan-In)"]
+    A2 --> FanIn
+    A3 --> FanIn
+    AN --> FanIn
+    
+    FanIn --> Result["Aggregated Result"]
 ```
 
 ---
@@ -336,24 +318,18 @@ public override async Task<BatchResult> RunAsync(
 
 ### Parallelism Limits
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  PARALLELISM CONSIDERATIONS                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Scenario              Recommendation                            │
-│  ─────────             ──────────────                            │
-│  100 items             Full parallel (100 concurrent)            │
-│  1,000 items           Chunk into batches of 50-100              │
-│  10,000+ items         Chunk + use sub-orchestrations           │
-│                                                                  │
-│  Memory per item       Impact                                    │
-│  ───────────────       ──────                                    │
-│  < 1 KB                Minimal concern                           │
-│  1-10 KB               Monitor memory usage                      │
-│  > 10 KB               Consider streaming patterns               │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Considerations["Parallelism Considerations"]
+        direction TB
+        S1["100 items → Full parallel (100 concurrent)"]
+        S2["1,000 items → Chunk into batches of 50-100"]
+        S3["10,000+ items → Chunk + use sub-orchestrations"]
+        
+        M1["< 1 KB per item → Minimal concern"]
+        M2["1-10 KB per item → Monitor memory usage"]
+        M3["> 10 KB per item → Consider streaming patterns"]
+    end
 ```
 
 ### Optimal Batch Sizes

@@ -25,41 +25,24 @@ Deploy durable orchestrations to AKS for full control over scaling, networking, 
 
 Azure Kubernetes Service (AKS) provides the most flexibility for deploying Durable Task SDK workers. Use AKS when you need fine-grained control over infrastructure, custom scaling, or integration with existing Kubernetes workloads.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                  AKS + DURABLE TASK SDK                          │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│   ┌──────────────────────────────────────────────────────────┐   │
-│   │                   AKS Cluster                             │   │
-│   │                                                           │   │
-│   │   ┌───────────────────────────────────────────────────┐   │   │
-│   │   │  Namespace: durable-system                        │   │   │
-│   │   │                                                    │   │   │
-│   │   │   ┌─────────────┐      ┌─────────────────────┐    │   │   │
-│   │   │   │  API        │      │  Worker Deployment  │    │   │   │
-│   │   │   │  Deployment │      │  (HPA enabled)      │    │   │   │
-│   │   │   │             │      │                     │    │   │   │
-│   │   │   │  Pods: 2    │      │  Pods: 3-20         │    │   │   │
-│   │   │   └──────┬──────┘      └──────────┬──────────┘    │   │   │
-│   │   │          │                        │               │   │   │
-│   │   │          │     ┌──────────────────┘               │   │   │
-│   │   │          │     │                                  │   │   │
-│   │   │   ┌──────▼─────▼─────┐                           │   │   │
-│   │   │   │  Ingress         │                           │   │   │
-│   │   │   │  (NGINX/Gateway) │                           │   │   │
-│   │   │   └──────────────────┘                           │   │   │
-│   │   │                                                    │   │   │
-│   │   └────────────────────────────────────────────────────┘   │
-│   │                              │                               │
-│   └──────────────────────────────┼───────────────────────────┘   │
-│                                  │ gRPC                          │
-│                                  ▼                               │
-│   ┌──────────────────────────────────────────────────────────┐   │
-│   │                 Durable Task Scheduler                    │   │
-│   └──────────────────────────────────────────────────────────┘   │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph AKS["AKS + Durable Task SDK"]
+        subgraph Cluster["AKS Cluster"]
+            subgraph NS["Namespace: durable-system"]
+                API["API Deployment<br/>Pods: 2"]
+                Worker["Worker Deployment<br/>(HPA enabled)<br/>Pods: 3-20"]
+                Ingress["Ingress<br/>(NGINX/Gateway)"]
+                
+                API --> Ingress
+                Worker --> Ingress
+            end
+        end
+        
+        DTS["Durable Task Scheduler"]
+        
+        NS -->|gRPC| DTS
+    end
 ```
 
 ---
@@ -506,33 +489,34 @@ spec:
 
 ## Deployment Summary
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    AKS DEPLOYMENT CHECKLIST                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Infrastructure:                                                 │
-│  ☐ AKS cluster with OIDC and workload identity                 │
-│  ☐ Container Registry attached to AKS                          │
-│  ☐ Durable Task Scheduler and Task Hub                         │
-│                                                                  │
-│  Identity:                                                       │
-│  ☐ Managed identity created                                     │
-│  ☐ Federated credential configured                              │
-│  ☐ Durable Task Data Contributor role assigned                  │
-│                                                                  │
-│  Application:                                                    │
-│  ☐ Container images built and pushed                            │
-│  ☐ Kubernetes manifests applied                                 │
-│  ☐ HPA configured for worker scaling                            │
-│  ☐ Ingress configured for API                                   │
-│                                                                  │
-│  Optional:                                                       │
-│  ☐ KEDA for queue-based scaling                                 │
-│  ☐ Prometheus/Grafana for monitoring                            │
-│  ☐ cert-manager for TLS                                         │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Infra["Infrastructure"]
+        I1["☐ AKS cluster with OIDC and workload identity"]
+        I2["☐ Container Registry attached to AKS"]
+        I3["☐ Durable Task Scheduler and Task Hub"]
+    end
+    
+    subgraph Identity["Identity"]
+        D1["☐ Managed identity created"]
+        D2["☐ Federated credential configured"]
+        D3["☐ Durable Task Data Contributor role assigned"]
+    end
+    
+    subgraph App["Application"]
+        A1["☐ Container images built and pushed"]
+        A2["☐ Kubernetes manifests applied"]
+        A3["☐ HPA configured for worker scaling"]
+        A4["☐ Ingress configured for API"]
+    end
+    
+    subgraph Optional["Optional"]
+        O1["☐ KEDA for queue-based scaling"]
+        O2["☐ Prometheus/Grafana for monitoring"]
+        O3["☐ cert-manager for TLS"]
+    end
+    
+    Infra --> Identity --> App --> Optional
 ```
 
 ---

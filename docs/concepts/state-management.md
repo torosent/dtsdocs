@@ -25,17 +25,18 @@ Understanding how state is managed is crucial for building reliable durable orch
 
 The Durable Task Framework uses **event sourcing** to manage orchestration state. Instead of storing the current state directly, it stores a log of all events that have occurred.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                     ORCHESTRATION HISTORY                        │
-├──────────────────────────────────────────────────────────────────┤
-│  Event 1: OrchestratorStarted                                    │
-│  Event 2: TaskScheduled (Activity: "ValidateOrder")              │
-│  Event 3: TaskCompleted (Activity: "ValidateOrder", Result: true)│
-│  Event 4: TaskScheduled (Activity: "ProcessPayment")             │
-│  Event 5: TaskCompleted (Activity: "ProcessPayment", Result: ...)│
-│  Event 6: OrchestratorCompleted                                  │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph History["ORCHESTRATION HISTORY"]
+        E1["Event 1: OrchestratorStarted"]
+        E2["Event 2: TaskScheduled<br/>(Activity: ValidateOrder)"]
+        E3["Event 3: TaskCompleted<br/>(Activity: ValidateOrder, Result: true)"]
+        E4["Event 4: TaskScheduled<br/>(Activity: ProcessPayment)"]
+        E5["Event 5: TaskCompleted<br/>(Activity: ProcessPayment, Result: ...)"]
+        E6["Event 6: OrchestratorCompleted"]
+        
+        E1 --> E2 --> E3 --> E4 --> E5 --> E6
+    end
 ```
 
 ### Benefits of Event Sourcing
@@ -56,13 +57,23 @@ The Durable Task Framework uses **event sourcing** to manage orchestration state
 3. When an orchestrator awaits an external event
 4. When an orchestrator completes
 
-```
-Orchestrator Code:                    Checkpoints:
-┌─────────────────────────────┐      ┌─────────────────────┐
-│ var x = await Activity1();  │ ──▶  │ Checkpoint 1        │
-│ var y = await Activity2(x); │ ──▶  │ Checkpoint 2        │
-│ return x + y;               │ ──▶  │ Checkpoint 3 (done) │
-└─────────────────────────────┘      └─────────────────────┘
+```mermaid
+flowchart LR
+    subgraph Code["Orchestrator Code"]
+        C1["var x = await Activity1();"]
+        C2["var y = await Activity2(x);"]
+        C3["return x + y;"]
+    end
+    
+    subgraph Checkpoints["Checkpoints"]
+        CP1["Checkpoint 1"]
+        CP2["Checkpoint 2"]
+        CP3["Checkpoint 3 (done)"]
+    end
+    
+    C1 --> CP1
+    C2 --> CP2
+    C3 --> CP3
 ```
 
 ---
@@ -71,20 +82,19 @@ Orchestrator Code:                    Checkpoints:
 
 When an orchestration resumes after a checkpoint, the framework **replays** the orchestrator function from the beginning. It uses the stored history to skip already-completed work.
 
-```
-First Execution:
-┌─────────────────────────────────────────────────────────────┐
-│ var x = await Activity1();  ◀── Actually executes          │
-│ var y = await Activity2(x); ◀── Actually executes          │
-│ return x + y;               ◀── Actually executes          │
-└─────────────────────────────────────────────────────────────┘
-
-Replay (after Activity1 completes):
-┌─────────────────────────────────────────────────────────────┐
-│ var x = await Activity1();  ◀── Skipped (uses stored result)│
-│ var y = await Activity2(x); ◀── Actually executes          │
-│ return x + y;               ◀── Actually executes          │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph FirstExecution["First Execution"]
+        F1["var x = await Activity1();"] -->|"Actually executes"| F2["var y = await Activity2(x);"]
+        F2 -->|"Actually executes"| F3["return x + y;"]
+        F3 -->|"Actually executes"| FDone(("Done"))
+    end
+    
+    subgraph Replay["Replay (after Activity1 completes)"]
+        R1["var x = await Activity1();"] -->|"Skipped (uses stored result)"| R2["var y = await Activity2(x);"]
+        R2 -->|"Actually executes"| R3["return x + y;"]
+        R3 -->|"Actually executes"| RDone(("Done"))
+    end
 ```
 
 ### The `IsReplaying` Property
@@ -123,20 +133,19 @@ The **Durable Task Scheduler** is a fully managed backend that provides:
 - ✅ Automatic scaling
 - ✅ No storage management required
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                  DURABLE TASK SCHEDULER                     │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │  Managed Compute                                    │    │
-│  │  ├── Optimized dispatching                         │    │
-│  │  └── Automatic scaling                             │    │
-│  └────────────────────────────────────────────────────┘    │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │  Managed Storage                                    │    │
-│  │  ├── In-memory + persistent                        │    │
-│  │  └── Optimized for orchestrations                  │    │
-│  └────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph DTS["DURABLE TASK SCHEDULER"]
+        subgraph Compute["Managed Compute"]
+            C1["Optimized dispatching"]
+            C2["Automatic scaling"]
+        end
+        
+        subgraph Storage["Managed Storage"]
+            S1["In-memory + persistent"]
+            S2["Optimized for orchestrations"]
+        end
+    end
 ```
 
 ### Azure Storage (BYO)
@@ -147,14 +156,13 @@ The default "bring your own" storage option using Azure Storage:
 - Azure Blob Storage for large payloads
 - Azure Queue Storage for work items
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    AZURE STORAGE                            │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
-│  │   Tables    │  │    Blobs    │  │   Queues    │         │
-│  │  (history)  │  │ (payloads)  │  │ (work items)│         │
-│  └─────────────┘  └─────────────┘  └─────────────┘         │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph AzureStorage["AZURE STORAGE"]
+        Tables["Tables<br/>(history)"]
+        Blobs["Blobs<br/>(payloads)"]
+        Queues["Queues<br/>(work items)"]
+    end
 ```
 
 ### MSSQL (BYO)
@@ -266,44 +274,41 @@ Activities may execute more than once in rare failure scenarios:
 
 ### Scenario 1: Process Restart
 
-```
-Before Restart:
-┌──────────────────────────────────────────┐
-│ Orchestrator running                     │
-│ Activity1 completed ✓                    │
-│ Activity2 in progress...                 │
-└──────────────────────────────────────────┘
-            │
-            ▼ (Process crashes)
-            
-After Restart:
-┌──────────────────────────────────────────┐
-│ Orchestrator replays                     │
-│ Activity1 result from history ✓          │
-│ Activity2 result from history ✓ (done!)  │
-│ Continues with Activity3                 │
-└──────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Before["Before Restart"]
+        BR["Orchestrator running<br/>Activity1 completed ✓<br/>Activity2 in progress..."]
+    end
+    
+    Crash["💥 Process crashes"]
+    
+    subgraph After["After Restart"]
+        AR["Orchestrator replays<br/>Activity1 result from history ✓<br/>Activity2 result from history ✓ (done!)<br/>Continues with Activity3"]
+    end
+    
+    Before --> Crash --> After
 ```
 
 ### Scenario 2: Scale-Out
 
-```
-┌────────────────────────────────────────────────────────────────┐
-│  Multiple instances can process different orchestrations:     │
-│                                                                │
-│  ┌─────────────────┐  ┌─────────────────┐                     │
-│  │   Instance A    │  │   Instance B    │                     │
-│  │  Orchestration1 │  │  Orchestration2 │                     │
-│  │  Orchestration3 │  │  Orchestration4 │                     │
-│  └─────────────────┘  └─────────────────┘                     │
-│                │                │                              │
-│                └───────┬────────┘                              │
-│                        ▼                                       │
-│              ┌─────────────────┐                               │
-│              │  Shared Storage │                               │
-│              │  (Task Hub)     │                               │
-│              └─────────────────┘                               │
-└────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Instances["Multiple instances can process different orchestrations"]
+        subgraph IA["Instance A"]
+            O1["Orchestration1"]
+            O3["Orchestration3"]
+        end
+        
+        subgraph IB["Instance B"]
+            O2["Orchestration2"]
+            O4["Orchestration4"]
+        end
+    end
+    
+    Storage["Shared Storage<br/>(Task Hub)"]
+    
+    IA --> Storage
+    IB --> Storage
 ```
 
 ---

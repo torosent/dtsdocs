@@ -28,31 +28,27 @@ The Durable Task Scheduler is a managed Azure service that serves as the orchest
 - **Azure Durable Functions** — As an alternative to Azure Storage or MSSQL backends
 - **Durable Task SDKs** — For applications running on ACA, AKS, or other compute platforms
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  DURABLE TASK SCHEDULER                         │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  Orchestration Engine                                    │   │
-│  │  ├── Work item dispatching                               │   │
-│  │  ├── Automatic scaling                                   │   │
-│  │  └── Push-based work delivery                            │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  State Store                                             │   │
-│  │  ├── In-memory + persistent storage                      │   │
-│  │  ├── Optimized for orchestrations                        │   │
-│  │  └── Automatic checkpointing                             │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  Monitoring Dashboard                                    │   │
-│  │  ├── Orchestration status                                │   │
-│  │  ├── Execution history                                   │   │
-│  │  └── Timeline visualization                              │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph DTS["DURABLE TASK SCHEDULER"]
+        subgraph Engine["Orchestration Engine"]
+            E1["Work item dispatching"]
+            E2["Automatic scaling"]
+            E3["Push-based work delivery"]
+        end
+        
+        subgraph Store["State Store"]
+            S1["In-memory + persistent storage"]
+            S2["Optimized for orchestrations"]
+            S3["Automatic checkpointing"]
+        end
+        
+        subgraph Dashboard["Monitoring Dashboard"]
+            D1["Orchestration status"]
+            D2["Execution history"]
+            D3["Timeline visualization"]
+        end
+    end
 ```
 
 ---
@@ -103,20 +99,21 @@ Enterprise-grade security:
 
 The Durable Task Scheduler runs separately from your application, providing:
 
-```
-┌────────────────────────┐      ┌────────────────────────┐
-│    YOUR APPLICATION    │      │  DURABLE TASK SCHEDULER│
-│  ┌──────────────────┐  │      │  ┌──────────────────┐  │
-│  │  Orchestrators   │  │ gRPC │  │  Orchestration   │  │
-│  │  Activities      │◀─┼──────┼─▶│  Engine          │  │
-│  │  Entities        │  │      │  └──────────────────┘  │
-│  └──────────────────┘  │      │  ┌──────────────────┐  │
-│                        │      │  │  State Store     │  │
-│                        │      │  └──────────────────┘  │
-│                        │      │  ┌──────────────────┐  │
-│                        │      │  │  Dashboard       │  │
-│                        │      │  └──────────────────┘  │
-└────────────────────────┘      └────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph App["YOUR APPLICATION"]
+        Orch["Orchestrators"]
+        Act["Activities"]
+        Ent["Entities"]
+    end
+    
+    subgraph DTS["DURABLE TASK SCHEDULER"]
+        Engine["Orchestration<br/>Engine"]
+        Store["State Store"]
+        Dash["Dashboard"]
+    end
+    
+    App <-->|"gRPC"| DTS
 ```
 
 **Benefits of separation:**
@@ -139,16 +136,24 @@ Apps connect to the scheduler via:
 
 A **task hub** is a logical container for orchestrations within a scheduler:
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                       SCHEDULER                              │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐  │
-│  │  Task Hub: Dev  │  │ Task Hub: Staging│  │Task Hub: Prod│ │
-│  │                 │  │                 │  │             │  │
-│  │  Orchestrations │  │  Orchestrations │  │ Orchestrations│ │
-│  │  Dashboard      │  │  Dashboard      │  │ Dashboard   │  │
-│  └─────────────────┘  └─────────────────┘  └─────────────┘  │
-└──────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Scheduler["SCHEDULER"]
+        subgraph Dev["Task Hub: Dev"]
+            DO["Orchestrations"]
+            DD["Dashboard"]
+        end
+        
+        subgraph Staging["Task Hub: Staging"]
+            SO["Orchestrations"]
+            SD["Dashboard"]
+        end
+        
+        subgraph Prod["Task Hub: Prod"]
+            PO["Orchestrations"]
+            PD["Dashboard"]
+        end
+    end
 ```
 
 ### Task Hub Use Cases
@@ -183,34 +188,22 @@ Each task hub has its own:
 
 ### With Durable Functions
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    AZURE FUNCTIONS                          │
-│  ┌───────────────────────────────────────────────────────┐ │
-│  │  Durable Functions Extension                          │ │
-│  └───────────────────────────────────────────────────────┘ │
-│                           │                                 │
-│                           ▼                                 │
-│  ┌───────────────────────────────────────────────────────┐ │
-│  │  Durable Task Scheduler                               │ │
-│  └───────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph AF["AZURE FUNCTIONS"]
+        Ext["Durable Functions Extension"]
+        Ext --> DTS["Durable Task Scheduler"]
+    end
 ```
 
 ### With Durable Task SDKs
 
-```
-┌───────────────────────────────────────────────────────────────┐
-│  AZURE CONTAINER APPS / AKS / VMs                            │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │  Your Application + Durable Task SDK                    │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                           │                                   │
-│                           ▼                                   │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │  Durable Task Scheduler                                 │ │
-│  └─────────────────────────────────────────────────────────┘ │
-└───────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Compute["AZURE CONTAINER APPS / AKS / VMs"]
+        App["Your Application + Durable Task SDK"]
+        App --> DTS["Durable Task Scheduler"]
+    end
 ```
 
 ---

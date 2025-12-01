@@ -25,35 +25,12 @@ Execute a sequence of functions in a specific order, where the output of one fun
 
 Function chaining is the most fundamental orchestration pattern. It executes activities sequentially, passing data from one step to the next.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    FUNCTION CHAINING                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│    Input                                                     │
-│      │                                                       │
-│      ▼                                                       │
-│  ┌───────────┐                                               │
-│  │ Activity  │                                               │
-│  │    A      │                                               │
-│  └─────┬─────┘                                               │
-│        │ Output A                                            │
-│        ▼                                                     │
-│  ┌───────────┐                                               │
-│  │ Activity  │                                               │
-│  │    B      │                                               │
-│  └─────┬─────┘                                               │
-│        │ Output B                                            │
-│        ▼                                                     │
-│  ┌───────────┐                                               │
-│  │ Activity  │                                               │
-│  │    C      │                                               │
-│  └─────┬─────┘                                               │
-│        │                                                     │
-│        ▼                                                     │
-│     Result                                                   │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Input([Input]) --> A[Activity A]
+    A -->|Output A| B[Activity B]
+    B -->|Output B| C[Activity C]
+    C --> Result([Result])
 ```
 
 ---

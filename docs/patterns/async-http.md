@@ -25,38 +25,28 @@ Expose long-running orchestrations as HTTP APIs with polling or webhook-based co
 
 The async HTTP API pattern provides a standard way to expose durable orchestrations through HTTP endpoints. Clients start an operation and either poll for completion or receive a webhook callback.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                     ASYNC HTTP API PATTERN                        │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│   Client                     API                 Orchestration    │
-│   ──────                     ───                 ────────────     │
-│                                                                   │
-│   POST /api/process ─────────►                                    │
-│                              │                                    │
-│   ◄──── 202 Accepted ────────┤                                    │
-│         Location: /status/123│                                    │
-│                              │                                    │
-│         ┌────────────────────┼─────────────────────────────┐     │
-│         │ Option A: Polling  │                             │     │
-│         │                    │                             │     │
-│   GET /status/123 ──────────►│                             │     │
-│   ◄──── 202 Running ─────────┤                             │     │
-│         ...                  │      Long-running          │     │
-│   GET /status/123 ──────────►│      processing...         │     │
-│   ◄──── 200 Completed ───────┤ ◄───────────────────────────│     │
-│         {result}             │                             │     │
-│         └────────────────────┼─────────────────────────────┘     │
-│                              │                                    │
-│         ┌────────────────────┼─────────────────────────────┐     │
-│         │ Option B: Webhook  │                             │     │
-│         │                    │                             │     │
-│   ◄───────────────────────────────── POST /callback ───────│     │
-│         {result}             │                             │     │
-│         └────────────────────┴─────────────────────────────┘     │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Orchestration
+    
+    Client->>API: POST /api/process
+    API->>Client: 202 Accepted<br/>Location: /status/123
+    
+    rect rgb(200, 220, 240)
+        Note over Client,Orchestration: Option A: Polling
+        Client->>API: GET /status/123
+        API->>Client: 202 Running
+        Note over Orchestration: Long-running<br/>processing...
+        Client->>API: GET /status/123
+        API->>Client: 200 Completed {result}
+    end
+    
+    rect rgb(220, 240, 200)
+        Note over Client,Orchestration: Option B: Webhook
+        Orchestration->>Client: POST /callback {result}
+    end
 ```
 
 ---

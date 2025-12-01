@@ -132,35 +132,28 @@ Typical deployment patterns:
 
 #### Single Process (Worker + Client)
 
-```
-┌─────────────────────────────────────┐
-│           APPLICATION               │
-│  ┌─────────────────────────────┐   │
-│  │  Worker + Client            │   │
-│  │  ├── HTTP API (client)      │   │
-│  │  └── Background (worker)    │   │
-│  └─────────────────────────────┘   │
-└─────────────────────────────────────┘
-                │
-                ▼
-      ┌─────────────────┐
-      │    Scheduler    │
-      └─────────────────┘
+```mermaid
+flowchart TB
+    subgraph SingleApp["APPLICATION"]
+        subgraph Combined["Worker + Client"]
+            HTTP["HTTP API (client)"]
+            BG["Background (worker)"]
+        end
+    end
+    
+    SingleApp --> Scheduler1["Scheduler"]
 ```
 
 #### Separate Processes
 
-```
-┌─────────────────┐    ┌─────────────────┐
-│   API Service   │    │  Worker Service │
-│   (client only) │    │  (worker only)  │
-└────────┬────────┘    └────────┬────────┘
-         │                      │
-         └──────────┬───────────┘
-                    ▼
-          ┌─────────────────┐
-          │    Scheduler    │
-          └─────────────────┘
+```mermaid
+flowchart TB
+    API["API Service<br/>(client only)"]
+    Worker["Worker Service<br/>(worker only)"]
+    Scheduler2["Scheduler"]
+    
+    API --> Scheduler2
+    Worker --> Scheduler2
 ```
 
 ---

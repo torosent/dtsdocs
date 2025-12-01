@@ -30,20 +30,24 @@ An activity function is a regular function that:
 - **Can be retried** — The framework can automatically retry failed activities
 - **Has no replay constraints** — Unlike orchestrators, activities don't need to be deterministic
 
-```
-ORCHESTRATOR                         ACTIVITIES
-┌────────────┐                    ┌─────────────┐
-│            │──── call ─────────▶│ ValidateData│
-│            │◀─── result ────────│             │
-│            │                    └─────────────┘
-│            │                    ┌─────────────┐
-│ Workflow   │──── call ─────────▶│ SaveToDb    │
-│ Logic      │◀─── result ────────│             │
-│            │                    └─────────────┘
-│            │                    ┌─────────────┐
-│            │──── call ─────────▶│ SendEmail   │
-│            │◀─── result ────────│             │
-└────────────┘                    └─────────────┘
+```mermaid
+flowchart LR
+    subgraph Orchestrator
+        O[Workflow Logic]
+    end
+    
+    subgraph Activities
+        A1[ValidateData]
+        A2[SaveToDb]
+        A3[SendEmail]
+    end
+    
+    O -->|call| A1
+    A1 -->|result| O
+    O -->|call| A2
+    A2 -->|result| O
+    O -->|call| A3
+    A3 -->|result| O
 ```
 
 ---

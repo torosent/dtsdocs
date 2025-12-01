@@ -30,15 +30,16 @@ An orchestrator function is a special type of function that:
 - **Survives failures** — Can resume from the last checkpoint after a crash or restart
 - **Supports long-running processes** — Can run for seconds, minutes, days, or even indefinitely
 
-```
-                    ORCHESTRATOR FUNCTION
-┌────────────────────────────────────────────────────────────┐
-│                                                            │
-│   Start ──▶ Activity 1 ──▶ Activity 2 ──▶ Activity 3       │
-│                  │              │              │           │
-│            [checkpoint]   [checkpoint]   [checkpoint]      │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph Orchestrator["Orchestrator Function"]
+        Start([Start]) --> A1[Activity 1]
+        A1 --> C1[checkpoint]
+        C1 --> A2[Activity 2]
+        A2 --> C2[checkpoint]
+        C2 --> A3[Activity 3]
+        A3 --> C3[checkpoint]
+    end
 ```
 
 ---
@@ -51,14 +52,22 @@ Orchestrator functions use **event sourcing** to maintain their state. Every act
 
 When an orchestrator needs to resume after a checkpoint, the framework **replays** the function from the beginning, using the stored history to skip already-completed work.
 
-```
-History:                      Replay:
-┌─────────────────────┐      ┌─────────────────────────────────┐
-│ 1. Started          │      │ Start execution                 │
-│ 2. Activity1 called │  ──▶ │ Activity1 called → skip (done)  │
-│ 3. Activity1 done   │      │ Activity2 called → execute now  │
-│ 4. Activity2 called │      │                                 │
-└─────────────────────┘      └─────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph History["History"]
+        H1["1. Started"]
+        H2["2. Activity1 called"]
+        H3["3. Activity1 done"]
+        H4["4. Activity2 called"]
+    end
+    
+    subgraph Replay["Replay"]
+        R1["Start execution"]
+        R2["Activity1 called → skip (done)"]
+        R3["Activity2 called → execute now"]
+    end
+    
+    History --> Replay
 ```
 
 ### The Orchestration Cycle

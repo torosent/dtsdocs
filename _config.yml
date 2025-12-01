@@ -70,6 +70,10 @@ kramdown:
     block:
       line_numbers: false
 
+# Mermaid diagrams
+mermaid:
+  version: "10.6.0"
+
 # Exclude from processing
 exclude:
   - .sass-cache/

@@ -25,36 +25,17 @@ Pause orchestration execution to wait for human input, approval, or decision-mak
 
 The human interaction pattern enables workflows to incorporate human decision-making, approvals, or data input. The orchestration suspends until an external event is received.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                     HUMAN INTERACTION PATTERN                     │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│     ┌──────────────┐         ┌──────────────┐                    │
-│     │  Start       │         │   Human      │                    │
-│     │  Request     │         │   (Email,    │                    │
-│     └──────┬───────┘         │    UI, etc.) │                    │
-│            │                 └──────┬───────┘                    │
-│            ▼                        │                            │
-│     ┌──────────────┐                │                            │
-│     │  Send        │                │                            │
-│     │  Notification│───────────────►│                            │
-│     └──────┬───────┘                │                            │
-│            │                        │                            │
-│            ▼                        │                            │
-│     ┌──────────────┐                │                            │
-│     │  Wait for    │◄───────────────┤                            │
-│     │  Response    │   (Approve/    │                            │
-│     │  (Timer)     │    Reject)     │                            │
-│     └──────┬───────┘                │                            │
-│            │                        │                            │
-│            ├── Approved ────────────┘                            │
-│            │                                                      │
-│            ├── Rejected ──► Notify Rejection                     │
-│            │                                                      │
-│            └── Timeout ───► Escalate or Cancel                   │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Start[Start Request] --> Notify[Send Notification]
+    Notify --> Wait[Wait for Response<br/>with Timer]
+    
+    Human([Human<br/>Email, UI, etc.])
+    Human -->|Approve/Reject| Wait
+    
+    Wait -->|Approved| Process[Notify Rejection]
+    Wait -->|Rejected| Reject[Notify Rejection]
+    Wait -->|Timeout| Escalate[Escalate or Cancel]
 ```
 
 ---

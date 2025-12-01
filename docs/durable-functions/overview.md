@@ -33,28 +33,26 @@ Durable Functions lets you write **orchestrator functions** that coordinate the 
 - Replay-based execution
 - Long-running workflows
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    AZURE FUNCTIONS HOST                         │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │              DURABLE FUNCTIONS EXTENSION                   │ │
-│  │  ┌──────────────────────────────────────────────────────┐ │ │
-│  │  │  Your Code                                           │ │ │
-│  │  │  ├── Orchestrator Functions                          │ │ │
-│  │  │  ├── Activity Functions                              │ │ │
-│  │  │  ├── Entity Functions                                │ │ │
-│  │  │  └── Client Functions                                │ │ │
-│  │  └──────────────────────────────────────────────────────┘ │ │
-│  │                          │                                 │ │
-│  │                          ▼                                 │ │
-│  │  ┌──────────────────────────────────────────────────────┐ │ │
-│  │  │  Storage Backend                                     │ │ │
-│  │  │  ├── Durable Task Scheduler (recommended)            │ │ │
-│  │  │  ├── Azure Storage                                   │ │ │
-│  │  │  └── MSSQL                                           │ │ │
-│  │  └──────────────────────────────────────────────────────┘ │ │
-│  └───────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Host["AZURE FUNCTIONS HOST"]
+        subgraph Extension["DURABLE FUNCTIONS EXTENSION"]
+            subgraph Code["Your Code"]
+                Orch["Orchestrator Functions"]
+                Act["Activity Functions"]
+                Ent["Entity Functions"]
+                Client["Client Functions"]
+            end
+            
+            Code --> Backend
+            
+            subgraph Backend["Storage Backend"]
+                DTS["Durable Task Scheduler (recommended)"]
+                AS["Azure Storage"]
+                SQL["MSSQL"]
+            end
+        end
+    end
 ```
 
 ---

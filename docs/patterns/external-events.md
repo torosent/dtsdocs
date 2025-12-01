@@ -25,35 +25,20 @@ React to external signals and events that arrive asynchronously during orchestra
 
 The external events pattern allows orchestrations to pause and wait for signals from external systems, users, or other orchestrations. This enables event-driven workflow patterns.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                     EXTERNAL EVENTS PATTERN                       │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│   External System                        Orchestration            │
-│   ───────────────                        ─────────────            │
-│                                                                   │
-│   ┌──────────────┐                   ┌──────────────────────────┐│
-│   │ Payment      │                   │  Start                   ││
-│   │ Gateway      │                   │    │                     ││
-│   └──────┬───────┘                   │    ▼                     ││
-│          │                           │  Process Order           ││
-│          │                           │    │                     ││
-│          │                           │    ▼                     ││
-│          │  PaymentComplete ─────────┼─► WaitForExternalEvent   ││
-│          │                           │    │                     ││
-│          │                           │    ▼                     ││
-│   ┌──────┴───────┐                   │  Ship Order              ││
-│   │ Shipping     │                   │    │                     ││
-│   │ Provider     │                   │    ▼                     ││
-│   └──────┬───────┘                   │  WaitForExternalEvent ◄──┼┤
-│          │                           │    │                     ││
-│          │  ShipmentUpdate ──────────┼────┘                     ││
-│          │                           │    ▼                     ││
-│          │                           │  Complete                ││
-│          │                           └──────────────────────────┘│
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant Payment as Payment Gateway
+    participant Shipping as Shipping Provider
+    participant Orch as Orchestration
+    
+    Orch->>Orch: Start
+    Orch->>Orch: Process Order
+    Orch->>Orch: WaitForExternalEvent
+    Payment->>Orch: PaymentComplete
+    Orch->>Orch: Ship Order
+    Orch->>Orch: WaitForExternalEvent
+    Shipping->>Orch: ShipmentUpdate
+    Orch->>Orch: Complete
 ```
 
 ---
@@ -429,30 +414,18 @@ public override async Task<OrderResult> RunAsync(
 
 ## Webhook Integration Pattern
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    WEBHOOK INTEGRATION                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   1. Start Orchestration                                         │
-│      └─► Create instance with known ID (e.g., order-123)        │
-│                                                                  │
-│   2. Register Webhook                                            │
-│      └─► Tell external system: callback to /webhooks/order-123  │
-│                                                                  │
-│   3. Orchestration Waits                                         │
-│      └─► WaitForExternalEvent("CallbackReceived")               │
-│                                                                  │
-│   4. External System Calls Back                                  │
-│      └─► POST /webhooks/order-123 with payload                  │
-│                                                                  │
-│   5. Webhook Handler                                             │
-│      └─► RaiseEventAsync("order-123", "CallbackReceived", data) │
-│                                                                  │
-│   6. Orchestration Resumes                                       │
-│      └─► Process callback data and continue                     │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Steps["Webhook Integration"]
+        S1["1. Start Orchestration<br/>Create instance with known ID (e.g., order-123)"]
+        S2["2. Register Webhook<br/>Tell external system: callback to /webhooks/order-123"]
+        S3["3. Orchestration Waits<br/>WaitForExternalEvent('CallbackReceived')"]
+        S4["4. External System Calls Back<br/>POST /webhooks/order-123 with payload"]
+        S5["5. Webhook Handler<br/>RaiseEventAsync('order-123', 'CallbackReceived', data)"]
+        S6["6. Orchestration Resumes<br/>Process callback data and continue"]
+        
+        S1 --> S2 --> S3 --> S4 --> S5 --> S6
+    end
 ```
 
 ---

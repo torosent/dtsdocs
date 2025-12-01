@@ -25,27 +25,19 @@ Use durable entities to maintain state that can be updated by multiple external 
 
 The aggregator pattern uses durable entities to collect and aggregate data from multiple sources. Unlike orchestrations that complete after a workflow, entities persist indefinitely and can receive signals at any time.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                       AGGREGATOR PATTERN                          │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│   Event 1 ──────┐                                                │
-│                 │                                                 │
-│   Event 2 ──────┤         ┌─────────────────────┐                │
-│                 ├────────►│    Durable Entity    │               │
-│   Event 3 ──────┤         │                     │                │
-│                 │         │  ┌───────────────┐  │                │
-│   Event N ──────┘         │  │    State      │  │                │
-│                           │  │               │  │                │
-│                           │  │  count: 42    │  │                │
-│                           │  │  sum: 1250.5  │  │                │
-│      Query ──────────────►│  │  items: [...]│  │───► Response   │
-│                           │  │               │  │                │
-│                           │  └───────────────┘  │                │
-│                           └─────────────────────┘                │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    E1[Event 1] --> Entity
+    E2[Event 2] --> Entity
+    E3[Event 3] --> Entity
+    EN[Event N] --> Entity
+    
+    subgraph Entity["Durable Entity"]
+        State["State<br/>count: 42<br/>sum: 1250.5<br/>items: [...]"]
+    end
+    
+    Query[Query] --> Entity
+    Entity --> Response[Response]
 ```
 
 ---
@@ -428,35 +420,16 @@ public override async Task<TransferResult> RunAsync(
 
 ## Entity Lifecycle
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      ENTITY LIFECYCLE                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   ┌─────────────┐   First Signal   ┌──────────────┐             │
-│   │  Not Exists │ ─────────────────► │   Created   │             │
-│   └─────────────┘                   └──────┬───────┘             │
-│                                            │                     │
-│                                            ▼                     │
-│                                     ┌──────────────┐             │
-│                     ┌───────────────│    Active    │◄──────┐     │
-│                     │               └──────┬───────┘       │     │
-│                     │                      │               │     │
-│                Signal/Call           No Activity          Signal │
-│                     │                      │               │     │
-│                     │                      ▼               │     │
-│                     │               ┌──────────────┐       │     │
-│                     └───────────────│    Idle      │───────┘     │
-│                                     └──────┬───────┘             │
-│                                            │                     │
-│                                       Delete/TTL                 │
-│                                            │                     │
-│                                            ▼                     │
-│                                     ┌──────────────┐             │
-│                                     │   Deleted    │             │
-│                                     └──────────────┘             │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> Created: First Signal
+    Created --> Active
+    Active --> Active: Signal/Call
+    Active --> Idle: No Activity
+    Idle --> Active: Signal
+    Idle --> Deleted: Delete/TTL
+    Active --> Deleted: Delete/TTL
+    Deleted --> [*]
 ```
 
 ---

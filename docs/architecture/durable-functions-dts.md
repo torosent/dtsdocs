@@ -25,33 +25,23 @@ Configure Azure Durable Functions to use the Durable Task Scheduler as its backe
 
 Durable Functions can use the Durable Task Scheduler as a storage backend instead of the default Azure Storage. This provides a fully managed experience with built-in dashboard, better performance, and simplified operations.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│           DURABLE FUNCTIONS + DURABLE TASK SCHEDULER             │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│    ┌────────────────────────────────────────────────────────┐    │
-│    │                   Azure Functions                       │    │
-│    │  ┌────────────┐  ┌────────────┐  ┌────────────────┐    │    │
-│    │  │   HTTP     │  │ Orchestrator│  │   Activity    │    │    │
-│    │  │  Trigger   │──│  Function   │──│   Functions   │    │    │
-│    │  └────────────┘  └──────┬─────┘  └────────────────┘    │    │
-│    │                         │                               │    │
-│    │                         │ gRPC                          │    │
-│    └─────────────────────────┼──────────────────────────────┘    │
-│                              │                                    │
-│                              ▼                                    │
-│    ┌────────────────────────────────────────────────────────┐    │
-│    │              Durable Task Scheduler                     │    │
-│    │                                                         │    │
-│    │    ┌─────────────┐    ┌─────────────┐                  │    │
-│    │    │  Task Hub   │    │  Dashboard  │                  │    │
-│    │    │   State     │    │             │                  │    │
-│    │    └─────────────┘    └─────────────┘                  │    │
-│    │                                                         │    │
-│    └────────────────────────────────────────────────────────┘    │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph DF["Durable Functions + Durable Task Scheduler"]
+        subgraph Functions["Azure Functions"]
+            HTTP["HTTP Trigger"]
+            Orch["Orchestrator Function"]
+            Act["Activity Functions"]
+            HTTP --> Orch --> Act
+        end
+        
+        subgraph DTS["Durable Task Scheduler"]
+            TaskHub["Task Hub State"]
+            Dashboard["Dashboard"]
+        end
+        
+        Functions -->|gRPC| DTS
+    end
 ```
 
 ---

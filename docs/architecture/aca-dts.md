@@ -25,36 +25,22 @@ Deploy durable orchestrations to Azure Container Apps using the Durable Task SDK
 
 Azure Container Apps provides a fully managed serverless container platform that's ideal for running Durable Task SDK workers. It offers automatic scaling, built-in HTTPS, and simplified deployment.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│            AZURE CONTAINER APPS + DURABLE TASK SDK               │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│   ┌──────────────────────────────────────────────────────────┐   │
-│   │              Container Apps Environment                   │   │
-│   │                                                           │   │
-│   │   ┌─────────────────┐      ┌─────────────────────────┐   │   │
-│   │   │   API App       │      │     Worker App          │   │   │
-│   │   │                 │      │                         │   │   │
-│   │   │   - HTTP APIs   │──────│   - Orchestrators       │   │   │
-│   │   │   - Start/Query │      │   - Activities          │   │   │
-│   │   │                 │      │   - Background process  │   │   │
-│   │   └─────────────────┘      └───────────┬─────────────┘   │   │
-│   │                                        │                 │   │
-│   └────────────────────────────────────────┼─────────────────┘   │
-│                                            │ gRPC                 │
-│                                            ▼                      │
-│   ┌──────────────────────────────────────────────────────────┐   │
-│   │                 Durable Task Scheduler                    │   │
-│   │                                                           │   │
-│   │      ┌─────────────┐        ┌─────────────────────┐      │   │
-│   │      │  Task Hub   │        │     Dashboard       │      │   │
-│   │      │   State     │        │                     │      │   │
-│   │      └─────────────┘        └─────────────────────┘      │   │
-│   │                                                           │   │
-│   └──────────────────────────────────────────────────────────┘   │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph ACA["Azure Container Apps + Durable Task SDK"]
+        subgraph ENV["Container Apps Environment"]
+            API["API App<br/>- HTTP APIs<br/>- Start/Query"]
+            Worker["Worker App<br/>- Orchestrators<br/>- Activities<br/>- Background process"]
+            API --> Worker
+        end
+        
+        subgraph DTS["Durable Task Scheduler"]
+            TaskHub["Task Hub<br/>State"]
+            Dashboard["Dashboard"]
+        end
+        
+        Worker -->|gRPC| DTS
+    end
 ```
 
 ---
@@ -355,25 +341,22 @@ az containerapp update \
 
 ## Deployment Summary
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    DEPLOYMENT CHECKLIST                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ☐ Durable Task Scheduler created                               │
-│  ☐ Task Hub created                                             │
-│  ☐ Container Registry created                                   │
-│  ☐ Container Apps Environment created                           │
-│  ☐ Managed Identity created                                     │
-│  ☐ Role assignments configured:                                 │
-│      - Durable Task Data Contributor on Scheduler               │
-│      - AcrPull on Container Registry                            │
-│  ☐ Worker container image built and pushed                      │
-│  ☐ API container image built and pushed                         │
-│  ☐ Worker Container App deployed                                │
-│  ☐ API Container App deployed with external ingress             │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Checklist["Deployment Checklist"]
+        A["☐ Durable Task Scheduler created"]
+        B["☐ Task Hub created"]
+        C["☐ Container Registry created"]
+        D["☐ Container Apps Environment created"]
+        E["☐ Managed Identity created"]
+        F["☐ Role assignments configured:<br/>- Durable Task Data Contributor on Scheduler<br/>- AcrPull on Container Registry"]
+        G["☐ Worker container image built and pushed"]
+        H["☐ API container image built and pushed"]
+        I["☐ Worker Container App deployed"]
+        J["☐ API Container App deployed with external ingress"]
+        
+        A --> B --> C --> D --> E --> F --> G --> H --> I --> J
+    end
 ```
 
 ---

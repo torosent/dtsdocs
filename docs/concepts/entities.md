@@ -30,19 +30,18 @@ An entity function is a stateful object that:
 - **Is addressable by ID** — Each entity has a unique identifier
 - **Persists automatically** — State is saved without manual intervention
 
-```
-                    ENTITY: Counter ("myCounter")
-┌──────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│   State: { currentValue: 42 }                                    │
-│                                                                  │
-│   Operations:                                                    │
-│   ├── add(5)    ──▶  State becomes: { currentValue: 47 }        │
-│   ├── subtract(2) ▶  State becomes: { currentValue: 45 }        │
-│   ├── get()     ──▶  Returns: 45                                │
-│   └── reset()   ──▶  State becomes: { currentValue: 0 }         │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Entity["Entity: Counter ('myCounter')"]
+        State["State: { currentValue: 42 }"]
+        
+        Op1["add(5) → State: { currentValue: 47 }"]
+        Op2["subtract(2) → State: { currentValue: 45 }"]
+        Op3["get() → Returns: 45"]
+        Op4["reset() → State: { currentValue: 0 }"]
+        
+        State --> Op1 --> Op2 --> Op3 --> Op4
+    end
 ```
 
 ---

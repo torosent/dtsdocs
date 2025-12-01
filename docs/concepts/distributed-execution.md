@@ -27,36 +27,29 @@ The Durable Task Framework is designed to scale horizontally across multiple wor
 
 The framework uses a **work item queue** model to distribute tasks across workers:
 
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                          BACKEND (DTS or BYO)                              │
-│                                                                            │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │                        WORK ITEM QUEUES                              │  │
-│  │                                                                      │  │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │  │
-│  │  │ Orchestrator │  │  Activity    │  │   Entity     │               │  │
-│  │  │ Work Items   │  │ Work Items   │  │ Work Items   │               │  │
-│  │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘               │  │
-│  │         │                 │                 │                        │  │
-│  └─────────│─────────────────│─────────────────│────────────────────────┘  │
-│            │                 │                 │                           │
-└────────────│─────────────────│─────────────────│───────────────────────────┘
-             │                 │                 │
-             ▼                 ▼                 ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│                              WORKERS                                        │
-│                                                                            │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐            │
-│  │    Worker 1     │  │    Worker 2     │  │    Worker 3     │            │
-│  │  ┌───────────┐  │  │  ┌───────────┐  │  │  ┌───────────┐  │            │
-│  │  │ Orch A    │  │  │  │ Orch B    │  │  │  │ Activity  │  │            │
-│  │  │ Orch C    │  │  │  │ Activity  │  │  │  │ Activity  │  │            │
-│  │  │ Activity  │  │  │  │ Activity  │  │  │  │ Activity  │  │            │
-│  │  └───────────┘  │  │  └───────────┘  │  │  └───────────┘  │            │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘            │
-│                                                                            │
-└────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Backend["Backend (DTS or BYO)"]
+        subgraph Queues["Work Item Queues"]
+            OQ["Orchestrator<br/>Work Items"]
+            AQ["Activity<br/>Work Items"]
+            EQ["Entity<br/>Work Items"]
+        end
+    end
+    
+    subgraph Workers["Workers"]
+        subgraph W1["Worker 1"]
+            W1A["Orch A<br/>Orch C<br/>Activity"]
+        end
+        subgraph W2["Worker 2"]
+            W2A["Orch B<br/>Activity<br/>Activity"]
+        end
+        subgraph W3["Worker 3"]
+            W3A["Activity<br/>Activity<br/>Activity"]
+        end
+    end
+    
+    Queues --> Workers
 ```
 
 ### Partitioning
@@ -72,29 +65,19 @@ The framework uses a **work item queue** model to distribute tasks across worker
 - Activity work items can be processed by **any available worker**
 - This allows activities to scale out massively
 
-```
-                    PARTITIONING MODEL
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
-│   Orchestrations (Partitioned):                                 │
-│   ┌─────────────────────────────────────────────────────────┐   │
-│   │  Partition 0   │  Partition 1   │  Partition 2   │  ... │   │
-│   │  ────────────  │  ────────────  │  ────────────  │      │   │
-│   │  Orch-abc123   │  Orch-def456   │  Orch-ghi789   │      │   │
-│   │  Orch-xyz999   │  Orch-lmn111   │  Orch-pqr222   │      │   │
-│   │  (Worker A)    │  (Worker B)    │  (Worker A)    │      │   │
-│   └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│   Activities (Not Partitioned):                                 │
-│   ┌─────────────────────────────────────────────────────────┐   │
-│   │  Any worker can process any activity work item          │   │
-│   │  Activity-1 → Worker A                                  │   │
-│   │  Activity-2 → Worker C                                  │   │
-│   │  Activity-3 → Worker B                                  │   │
-│   │  Activity-4 → Worker A                                  │   │
-│   └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Partitioning["Partitioning Model"]
+        subgraph Orchestrations["Orchestrations (Partitioned)"]
+            P0["Partition 0<br/>Orch-abc123<br/>Orch-xyz999<br/>(Worker A)"]
+            P1["Partition 1<br/>Orch-def456<br/>Orch-lmn111<br/>(Worker B)"]
+            P2["Partition 2<br/>Orch-ghi789<br/>Orch-pqr222<br/>(Worker A)"]
+        end
+        
+        subgraph Activities["Activities (Not Partitioned)"]
+            Act["Any worker can process any activity work item<br/>Activity-1 → Worker A<br/>Activity-2 → Worker C<br/>Activity-3 → Worker B<br/>Activity-4 → Worker A"]
+        end
+    end
 ```
 
 ---
@@ -208,35 +191,33 @@ If a worker crashes:
 3. **Replay resumes**: The orchestration replays from the last checkpoint
 4. **Execution continues**: Work proceeds as if nothing happened
 
-```
-                    FAILOVER SEQUENCE
-┌────────────────────────────────────────────────────────────────┐
-│                                                                │
-│  Time 0: Worker A processing Partition 0                       │
-│  ┌─────────────────┐                                           │
-│  │   Worker A ✓    │ ◀── Holds lease on Partition 0            │
-│  │   Orch-abc123   │                                           │
-│  └─────────────────┘                                           │
-│                                                                │
-│  Time 1: Worker A crashes                                      │
-│  ┌─────────────────┐                                           │
-│  │   Worker A ✗    │ ◀── Crash! Lease still held               │
-│  │   (crashed)     │                                           │
-│  └─────────────────┘                                           │
-│                                                                │
-│  Time 2: Lease expires                                         │
-│  ┌─────────────────┐                                           │
-│  │   Partition 0   │ ◀── Lease expired, available              │
-│  │   (unowned)     │                                           │
-│  └─────────────────┘                                           │
-│                                                                │
-│  Time 3: Worker B acquires partition                           │
-│  ┌─────────────────┐                                           │
-│  │   Worker B ✓    │ ◀── Acquires lease, replays               │
-│  │   Orch-abc123   │     orchestration from history            │
-│  └─────────────────┘                                           │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Time0["Time 0: Worker A processing Partition 0"]
+        WA0["Worker A ✓<br/>Orch-abc123"]
+        L0["Holds lease on Partition 0"]
+        WA0 --- L0
+    end
+    
+    subgraph Time1["Time 1: Worker A crashes"]
+        WA1["Worker A ✗<br/>(crashed)"]
+        L1["Crash! Lease still held"]
+        WA1 --- L1
+    end
+    
+    subgraph Time2["Time 2: Lease expires"]
+        P0["Partition 0<br/>(unowned)"]
+        L2["Lease expired, available"]
+        P0 --- L2
+    end
+    
+    subgraph Time3["Time 3: Worker B acquires partition"]
+        WB["Worker B ✓<br/>Orch-abc123"]
+        L3["Acquires lease, replays<br/>orchestration from history"]
+        WB --- L3
+    end
+    
+    Time0 --> Time1 --> Time2 --> Time3
 ```
 
 ### State Durability
