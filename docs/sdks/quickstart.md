@@ -3,106 +3,276 @@ layout: default
 title: Quickstart
 parent: Durable Task SDKs
 nav_order: 2
+permalink: /docs/sdks/quickstart/
 ---
 
-# Quickstart: Use the Durable Task SDKs
+# Quickstart: Build a Portable Durable Worker
+{: .no_toc }
 
-This guide demonstrates how to use the Durable Task SDKs (Microsoft.DurableTask) to build workflows that can run independently of Azure Functions, such as in a console app or a container.
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
+Build your first portable durable orchestration in under 10 minutes.
+{: .fs-6 .fw-300 }
+
+---
+
+## What You'll Build
+
+A console application that runs a "Hello World" orchestration, independent of Azure Functions:
+
+```
+Worker starts → Client schedules orchestration → Worker executes → Results returned
+```
+
+---
 
 ## Prerequisites
 
-*   .NET 6.0 or later (for the .NET SDK)
-*   A running sidecar (e.g., Azure Storage Emulator or a real Azure Storage account if using the Netherite/MSSQL backend, though typically the SDK connects to a backend via a sidecar or direct connection depending on the language).
-*   *Note: The Durable Task SDKs often work in conjunction with a backend provider. For simplicity, this guide assumes a basic setup.*
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download) (for .NET example)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for the local emulator)
 
-## .NET Console App Example
+---
 
-1.  Create a new console application:
-    ```bash
-    dotnet new console -n DurableTaskQuickstart
-    cd DurableTaskQuickstart
-    ```
+## Step 1: Start the Local Emulator
 
-2.  Add the NuGet package:
-    ```bash
-    dotnet add package Microsoft.DurableTask.Worker
-    ```
+```bash
+docker run -d -p 8080:8080 -p 8082:8082 mcr.microsoft.com/dts/dts-emulator:latest
+```
 
-3.  Update `Program.cs`:
+The emulator provides:
+- **gRPC endpoint** at `http://localhost:8080`  
+- **Dashboard** at `http://localhost:8082`
+
+---
+
+## Step 2: Create a New Project
+
+```bash
+# Create a new console app
+dotnet new console -n DurableWorkerQuickstart
+cd DurableWorkerQuickstart
+
+# Add the required packages
+dotnet add package Microsoft.DurableTask.Worker.AzureManaged
+dotnet add package Microsoft.DurableTask.Client.AzureManaged
+dotnet add package Microsoft.Extensions.Hosting
+```
+
+---
+
+## Step 3: Define Your Orchestration
+
+Replace the contents of `Program.cs`:
 
 ```csharp
 using Microsoft.DurableTask;
 using Microsoft.DurableTask.Worker;
+using Microsoft.DurableTask.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-// Define the orchestration
-class HelloOrchestration : TaskOrchestrator<string, List<string>>
+// Connection settings for local emulator
+var connectionString = "Endpoint=http://localhost:8080;Authentication=None";
+var taskHub = "default";
+
+// Build the host
+var builder = Host.CreateApplicationBuilder(args);
+
+// Configure logging
+builder.Logging.AddConsole();
+
+// Add the Durable Task Worker
+builder.Services.AddDurableTaskWorker(options =>
 {
-    public override async Task<List<string>> RunAsync(TaskOrchestrationContext context, string input)
-    {
-        var outputs = new List<string>();
+    options.AddOrchestrator<HelloCitiesOrchestrator>();
+    options.AddActivity<SayHelloActivity>();
+})
+.UseDurableTaskScheduler(connectionString, taskHub);
 
-        outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Tokyo"));
-        outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Seattle"));
-        outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "London"));
+// Add the Durable Task Client
+builder.Services.AddDurableTaskClient()
+    .UseDurableTaskScheduler(connectionString, taskHub);
 
-        return outputs;
-    }
-}
+// Build and start
+var host = builder.Build();
 
-// Define the activity
-class SayHello : TaskActivity<string, string>
+// Start an orchestration
+_ = Task.Run(async () =>
 {
-    public override Task<string> RunAsync(TaskActivityContext context, string input)
-    {
-        return Task.FromResult($"Hello {input}!");
-    }
-}
-
-// Setup and run the worker
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureLogging(logging => logging.AddConsole())
-    .ConfigureServices(services =>
-    {
-        services.AddDurableTaskWorker(builder =>
-        {
-            // Use a storage provider (e.g., Azure Storage)
-            // For this example, we assume a local emulator or connection string is configured
-            // builder.UseAzureStorage(...); 
-            
-            builder.AddOrchestrator<HelloOrchestration>();
-            builder.AddActivity<SayHello>();
-        });
-    })
-    .Build();
+    // Wait for worker to initialize
+    await Task.Delay(2000);
+    
+    var client = host.Services.GetRequiredService<DurableTaskClient>();
+    
+    Console.WriteLine("Starting orchestration...");
+    var instanceId = await client.ScheduleNewOrchestrationInstanceAsync(
+        nameof(HelloCitiesOrchestrator)
+    );
+    Console.WriteLine($"Started orchestration with ID: {instanceId}");
+    
+    // Wait for completion
+    var metadata = await client.WaitForInstanceCompletionAsync(
+        instanceId,
+        getInputsAndOutputs: true
+    );
+    
+    Console.WriteLine($"Status: {metadata.RuntimeStatus}");
+    Console.WriteLine($"Output: {metadata.SerializedOutput}");
+});
 
 await host.RunAsync();
+
+// Orchestrator - coordinates the workflow
+[DurableTask(nameof(HelloCitiesOrchestrator))]
+public class HelloCitiesOrchestrator : TaskOrchestrator<string?, string>
+{
+    public override async Task<string> RunAsync(
+        TaskOrchestrationContext context, 
+        string? input)
+    {
+        var results = new List<string>();
+        
+        results.Add(await context.CallActivityAsync<string>(nameof(SayHelloActivity), "Tokyo"));
+        results.Add(await context.CallActivityAsync<string>(nameof(SayHelloActivity), "London"));
+        results.Add(await context.CallActivityAsync<string>(nameof(SayHelloActivity), "Seattle"));
+        
+        return string.Join(" ", results);
+    }
+}
+
+// Activity - does the actual work
+[DurableTask(nameof(SayHelloActivity))]
+public class SayHelloActivity : TaskActivity<string, string>
+{
+    private readonly ILogger<SayHelloActivity> _logger;
+    
+    public SayHelloActivity(ILogger<SayHelloActivity> logger)
+    {
+        _logger = logger;
+    }
+    
+    public override Task<string> RunAsync(TaskActivityContext context, string city)
+    {
+        _logger.LogInformation("Saying hello to {City}", city);
+        return Task.FromResult($"Hello, {city}!");
+    }
+}
 ```
 
-## Running the Worker
+---
 
-1.  Run the application:
-    ```bash
-    dotnet run
-    ```
-2.  The worker will start polling for tasks. You will need a separate client to schedule an orchestration instance.
+## Step 4: Run the Application
 
-## Scheduling an Instance (Client)
-
-You can use the `DurableTaskClient` to schedule instances.
-
-```csharp
-// In a separate client app or part of the same host
-var client = host.Services.GetRequiredService<DurableTaskClient>();
-string instanceId = await client.ScheduleNewOrchestrationInstanceAsync(
-    nameof(HelloOrchestration), 
-    "World");
-Console.WriteLine($"Started instance: {instanceId}");
+```bash
+dotnet run
 ```
+
+You should see output like:
+
+```
+Starting orchestration...
+Started orchestration with ID: abc123
+info: SayHelloActivity[0]
+      Saying hello to Tokyo
+info: SayHelloActivity[0]
+      Saying hello to London
+info: SayHelloActivity[0]
+      Saying hello to Seattle
+Status: Completed
+Output: "Hello, Tokyo! Hello, London! Hello, Seattle!"
+```
+
+---
+
+## Step 5: View in Dashboard
+
+Open [http://localhost:8082](http://localhost:8082) to see your orchestration in the dashboard:
+
+- View the orchestration status
+- Inspect the execution timeline
+- See input/output values
+
+---
+
+## 🎉 Congratulations!
+
+You've built your first portable Durable Task application! This same code can run on:
+- Azure Container Apps
+- Azure Kubernetes Service (AKS)
+- Virtual Machines
+- On-premises servers
+
+---
+
+## Python Example
+
+For Python developers:
+
+```bash
+pip install durabletask-azure
+```
+
+```python
+import asyncio
+from durabletask import task
+from durabletask.azuremanaged.worker import DurableTaskSchedulerWorker, DurableTaskSchedulerWorkerOptions
+from durabletask.azuremanaged.client import DurableTaskSchedulerClient
+
+@task.orchestrator
+def hello_cities(ctx: task.OrchestrationContext, _: None):
+    results = []
+    results.append(yield ctx.call_activity("say_hello", input="Tokyo"))
+    results.append(yield ctx.call_activity("say_hello", input="London"))
+    results.append(yield ctx.call_activity("say_hello", input="Seattle"))
+    return " ".join(results)
+
+@task.activity
+def say_hello(ctx: task.ActivityContext, city: str) -> str:
+    print(f"Saying hello to {city}")
+    return f"Hello, {city}!"
+
+async def main():
+    options = DurableTaskSchedulerWorkerOptions(
+        host="localhost:8080",
+        secure_channel=False,
+        taskhub="default"
+    )
+    
+    async with DurableTaskSchedulerWorker(
+        options=options,
+        orchestrators=[hello_cities],
+        activities=[say_hello]
+    ) as worker:
+        await worker.start()
+        
+        client = DurableTaskSchedulerClient(
+            host="localhost:8080",
+            secure_channel=False,
+            taskhub="default"
+        )
+        
+        instance_id = await client.schedule_new_orchestration(hello_cities)
+        print(f"Started: {instance_id}")
+        
+        result = await client.wait_for_orchestration_completion(instance_id)
+        print(f"Result: {result.serialized_output}")
+
+asyncio.run(main())
+```
+
+---
 
 ## Next Steps
 
-*   [Explore the .NET SDK](dotnet.md)
-*   [Explore the Java SDK](java.md)
-*   [Explore the Python SDK](python.md)
+- [Explore the .NET SDK →](./dotnet.md)
+- [Explore the Python SDK →](./python.md)  
+- [Explore the Java SDK →](./java.md)
+- [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
+- [Explore Orchestration Patterns →](../patterns/index.md)

@@ -2,7 +2,7 @@
 layout: default
 title: Durable Functions
 nav_order: 3
-has_children: false
+has_children: true
 permalink: /docs/durable-functions/
 ---
 
@@ -17,7 +17,10 @@ permalink: /docs/durable-functions/
 
 ---
 
-Azure Durable Functions is an extension of Azure Functions that enables you to write stateful workflows in a serverless compute environment. It's the easiest way to get started with durable orchestrations if you're already using Azure Functions.
+Azure Durable Functions is an extension of Azure Functions that lets you write **stateful workflows** in a serverless compute environment. It's the easiest way to get started with durable orchestrations if you're already using Azure Functions.
+
+[Get Started →](./quickstart.md){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[View Samples →](./samples.md){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
@@ -84,6 +87,8 @@ Durable Functions lets you write **orchestrator functions** that coordinate the 
 ---
 
 ## Function Types
+
+> **Important:** To successfully build durable applications, you must understand the constraints and patterns of the [Programming Model](./programming-model.md).
 
 Durable Functions introduces four special function types:
 
@@ -319,8 +324,10 @@ func start
 
 ## Related Documentation
 
+- [Quickstart: Create your first Durable Function](./quickstart.md)
+- **[Programming Model](./programming-model.md)**
+- [Storage Providers](./storage-providers.md)
 - [Durable Functions Overview (Microsoft Learn)](https://learn.microsoft.com/azure/azure-functions/durable/)
-- [Quickstart: Create a Durable Functions app](https://learn.microsoft.com/azure/azure-functions/durable/durable-functions-isolated-create-first-csharp)
 - [Configure Durable Task Scheduler](../durable-task-scheduler/setup.md)
 - [Orchestration Patterns](../patterns/index.md)
 
@@ -328,6 +335,8 @@ func start
 
 ## Next Steps
 
-- [Set up Durable Task Scheduler →](../durable-task-scheduler/setup.md)
+- [Create your first Durable Function →](./quickstart.md)
+- [Learn about the Programming Model →](./programming-model.md)
+- [Choose a Storage Provider →](./storage-providers.md)
 - [Explore Orchestration Patterns →](../patterns/index.md)
-- [View Code Samples →](../samples/index.md)
+- [View Code Samples →](./samples.md)

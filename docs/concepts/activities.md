@@ -389,4 +389,4 @@ result = yield context.call_activity_with_retry(
 
 - [Learn about Entities →](./entities.md)
 - [Explore Fan-Out/Fan-In Pattern →](../patterns/fan-out-fan-in.md)
-- [View Code Samples →](../samples/index.md)
+- [View Code Samples →](../sdks/samples.md)

@@ -501,6 +501,6 @@ app.Run();
 
 ## Next Steps
 
-- [View .NET Samples →](../samples/csharp/index.md)
+- [View .NET Samples →](./samples.md)
 - [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
 - [Explore Patterns →](../patterns/index.md)

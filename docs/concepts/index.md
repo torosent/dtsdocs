@@ -38,7 +38,7 @@ Azure Durable orchestrations are built around four core function types:
 | **[Orchestrator](./orchestrators.md)** | Coordinates the execution of activities and sub-orchestrations |
 | **[Activity](./activities.md)** | Performs the actual work (database calls, API requests, computations) |
 | **[Entity](./entities.md)** | Manages small pieces of state with explicit operations |
-| **[Client](./clients.md)** | Starts and manages orchestration instances |
+| **Client** | Starts and manages orchestration instances (see [Instance Management](./instance-management.md)) |
 
 ---
 

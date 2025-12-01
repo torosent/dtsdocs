@@ -334,4 +334,4 @@ Open `http://localhost:<dashboard-port>` to view orchestrations.
 - [.NET SDK Details →](./dotnet.md)
 - [Python SDK Details →](./python.md)
 - [Java SDK Details →](./java.md)
-- [View Code Samples →](../samples/index.md)
+- [View Code Samples →](./samples.md)

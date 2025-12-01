@@ -350,4 +350,4 @@ az role assignment create \
 
 - [Set up the Dashboard →](./dashboard.md)
 - [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
-- [View Code Samples →](../samples/index.md)
+- [View Code Samples →](../sdks/samples.md)

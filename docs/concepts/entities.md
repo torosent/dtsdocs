@@ -376,4 +376,4 @@ Entity functions are available in:
 
 - [Learn about State Management →](./state-management.md)
 - [Explore the Aggregator Pattern →](../patterns/aggregator.md)
-- [View Code Samples →](../samples/index.md)
+- [View Code Samples →](../sdks/samples.md)

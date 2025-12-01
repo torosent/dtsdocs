@@ -315,4 +315,4 @@ var result = await context.CallActivityAsync<string>("UnreliableActivity", input
 
 - [Learn about Activities →](./activities.md)
 - [Explore Orchestration Patterns →](../patterns/index.md)
-- [View Code Samples →](../samples/index.md)
+- [View Code Samples →](../sdks/samples.md)

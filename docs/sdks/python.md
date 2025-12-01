@@ -36,42 +36,176 @@ pip install durabletask-azuremanaged
 
 ---
 
-## Basic Setup
+## Quickstart: Function Chaining
 
-### Worker Configuration
+This example demonstrates the "Function Chaining" pattern, where a sequence of functions executes in a specific order.
+
+### 1. Define the Worker (`worker.py`)
+
+The worker hosts the orchestrator and activity functions.
 
 ```python
 import asyncio
-from durabletask import worker
-from durabletask.azuremanaged.worker import DurableTaskSchedulerWorker, DurableTaskSchedulerWorkerOptions
+import logging
+import os
+from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
+from durabletask.azuremanaged.worker import DurableTaskSchedulerWorker
 
-# Define activities and orchestrators first (see below)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Activity functions
+def say_hello(ctx, name: str) -> str:
+    """First activity that greets the user."""
+    logger.info(f"Activity say_hello called with name: {name}")
+    return f"Hello {name}!"
+
+def process_greeting(ctx, greeting: str) -> str:
+    """Second activity that processes the greeting."""
+    logger.info(f"Activity process_greeting called with greeting: {greeting}")
+    return f"{greeting} How are you today?"
+
+def finalize_response(ctx, response: str) -> str:
+    """Third activity that finalizes the response."""
+    logger.info(f"Activity finalize_response called with response: {response}")
+    return f"{response} I hope you're doing well!"
+
+# Orchestrator function
+def function_chaining_orchestrator(ctx, name: str) -> str:
+    """Orchestrator that demonstrates function chaining pattern."""
+    logger.info(f"Starting function chaining orchestration for {name}")
+    
+    # Call first activity - passing input directly without named parameter
+    greeting = yield ctx.call_activity('say_hello', input=name)
+    
+    # Call second activity with the result from first activity
+    processed_greeting = yield ctx.call_activity('process_greeting', input=greeting)
+    
+    # Call third activity with the result from second activity
+    final_response = yield ctx.call_activity('finalize_response', input=processed_greeting)
+    
+    return final_response
 
 async def main():
-    # Configure the worker
-    options = DurableTaskSchedulerWorkerOptions(
-        host="your-scheduler.centralus.durabletask.io",
-        secure_channel=True,
-        taskhub="default"
-    )
+    """Main entry point for the worker process."""
+    logger.info("Starting Function Chaining pattern worker...")
     
-    async with DurableTaskSchedulerWorker(
-        options=options,
-        orchestrators=[order_processing_orchestrator],
-        activities=[validate_order, process_payment, ship_order]
+    # Get environment variables for taskhub and endpoint with defaults
+    taskhub_name = os.getenv("TASKHUB", "default")
+    endpoint = os.getenv("ENDPOINT", "http://localhost:8080")
+
+    print(f"Using taskhub: {taskhub_name}")
+    print(f"Using endpoint: {endpoint}")
+    
+    # Credential handling
+    credential = None
+    if endpoint != "http://localhost:8080":
+        credential = DefaultAzureCredential()
+    
+    with DurableTaskSchedulerWorker(
+        host_address=endpoint, 
+        secure_channel=endpoint != "http://localhost:8080",
+        taskhub=taskhub_name, 
+        token_credential=credential
     ) as worker:
-        await worker.start()
-        print("Worker started. Press Ctrl+C to stop.")
         
-        # Keep worker running
+        # Register activities and orchestrators
+        worker.add_activity(say_hello)
+        worker.add_activity(process_greeting)
+        worker.add_activity(finalize_response)
+        worker.add_orchestrator(function_chaining_orchestrator)
+        
+        # Start the worker
+        worker.start()
+        
         try:
-            await asyncio.Event().wait()
+            # Keep the worker running
+            while True:
+                await asyncio.sleep(1)
         except KeyboardInterrupt:
-            pass
+            logger.info("Worker shutdown initiated")
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
+### 2. Define the Client (`client.py`)
+
+The client schedules the orchestration.
+
+```python
+import asyncio
+import logging
+import sys
+import os
+from azure.identity import DefaultAzureCredential
+from durabletask.azuremanaged.client import DurableTaskSchedulerClient
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+async def main():
+    """Main entry point for the client application."""
+    logger.info("Starting Function Chaining pattern client...")
+    
+    # Get environment variables
+    taskhub_name = os.getenv("TASKHUB", "default")
+    endpoint = os.getenv("ENDPOINT", "http://localhost:8080")
+
+    # Credential handling
+    credential = None
+    if endpoint != "http://localhost:8080":
+        credential = DefaultAzureCredential()
+    
+    # Create a client
+    client = DurableTaskSchedulerClient(
+        host_address=endpoint, 
+        secure_channel=endpoint != "http://localhost:8080",
+        taskhub=taskhub_name, 
+        token_credential=credential
+    )
+    
+    # Get user input or use default name
+    name = sys.argv[1] if len(sys.argv) > 1 else "User"
+    
+    # Schedule the orchestration
+    instance_id = client.schedule_new_orchestration(
+        "function_chaining_orchestrator",
+        input=name
+    )
+    
+    logger.info(f"Orchestration scheduled with ID: {instance_id}")
+    
+    # Wait for completion
+    result = client.wait_for_orchestration_completion(
+        instance_id,
+        timeout=30
+    )
+    
+    logger.info(f"Orchestration completed with result: {result.serialized_output}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 3. Run the Example
+
+1.  **Start the Emulator** (if running locally):
+    ```bash
+    docker run -p 8080:8080 mcr.microsoft.com/dts/dts-emulator:latest
+    ```
+
+2.  **Start the Worker**:
+    ```bash
+    python worker.py
+    ```
+
+3.  **Run the Client**:
+    ```bash
+    python client.py "World"
+    ```
 
 ---
 

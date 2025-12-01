@@ -295,4 +295,4 @@ Focus on monitoring and health:
 
 - [Configure Identity Access →](./identity.md)
 - [Learn about Patterns →](../patterns/index.md)
-- [View Code Samples →](../samples/index.md)
+- [View Code Samples →](../sdks/samples.md)
