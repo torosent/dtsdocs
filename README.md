@@ -34,8 +34,8 @@ The documentation is organized into the following logical sections:
 
 ### 4. Durable Task Scheduler (`docs/durable-task-scheduler/`)
 **The "Managed Backend"**
-*   **Content**: Overview, Setup, Dashboard, Identity management.
-*   **Reasoning**: DTS is a standalone Azure service. It requires its own guide for provisioning, monitoring, and security, distinct from the compute platform that connects to it.
+*   **Content**: Overview, Setup, Dashboard, Identity management, Auto-Purge retention policies, Pricing & SKUs, Troubleshooting.
+*   **Reasoning**: DTS is a standalone Azure service. It requires its own guide for provisioning, monitoring, security, pricing, and troubleshooting distinct from the compute platform that connects to it.
 
 ### 5. Patterns (`docs/patterns/`)
 **The "How-To"**
@@ -106,7 +106,10 @@ docs/
 │   ├── overview.md            # Service capabilities
 │   ├── setup.md               # Provisioning guide
 │   ├── dashboard.md           # Monitoring and debugging
-│   └── identity.md            # Authentication and authorization
+│   ├── identity.md            # Authentication and authorization
+│   ├── auto-purge.md          # Retention policies configuration
+│   ├── pricing.md             # Pricing and SKU options
+│   └── troubleshooting.md     # Diagnose and resolve issues
 │
 ├── patterns/                  # Common architectural patterns
 │   ├── index.md               # Pattern overview
@@ -138,7 +141,7 @@ docs/
 | **Concepts** | 17 concept documents covering orchestrators, activities, entities, state management, error handling, versioning, task hubs, and more. |
 | **Durable Functions** | Overview, Quickstart, Programming Model, Storage Providers, and Samples. |
 | **SDKs** | Overview, Quickstart, and language-specific guides for .NET, Python, and Java. |
-| **DTS** | Overview, Setup, Dashboard, and Identity management guides. |
+| **DTS** | Overview, Setup, Dashboard, Identity management, Auto-Purge, Pricing & SKUs, and Troubleshooting guides. |
 | **Patterns** | 6 architectural patterns including chaining, fan-out/fan-in, and human interaction. |
 | **Architecture** | Deployment guides for Durable Functions, Container Apps, and AKS. |
 | **Comparison** | Decision guides, alternatives comparison, and real-world use cases. |

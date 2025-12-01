@@ -86,6 +86,71 @@ Durable Functions lets you write **orchestrator functions** that coordinate the 
 
 ---
 
+## .NET Worker Models: In-Process vs Isolated
+
+For .NET developers, Azure Functions supports two execution models. Understanding the differences is critical for new projects and existing applications.
+
+{: .warning }
+> **Important:** Support for the in-process model ends on **November 10, 2026**. We highly recommend migrating to the isolated worker model. See our [Migration Guide](./migration-guide.md) for step-by-step instructions.
+
+### Comparison Table
+
+| Feature | Isolated Worker Model | In-Process Model |
+|---------|----------------------|------------------|
+| **Support Status** | ✅ Actively supported | ⚠️ End of support Nov 2026 |
+| **.NET Versions** | .NET 8, .NET 9, .NET 10, .NET Framework 4.8 | .NET 8 only |
+| **Process Isolation** | Separate worker process | Same process as host |
+| **Assembly Conflicts** | ✅ No conflicts with host | ❌ Potential version conflicts |
+| **Middleware Support** | ✅ Full middleware pipeline | ❌ Not supported |
+| **Dependency Injection** | ✅ Standard .NET DI | ⚠️ Limited (via FunctionsStartup) |
+| **Startup Control** | ✅ Full control via Program.cs | ❌ Limited |
+| **ASP.NET Core Integration** | ✅ Full support | ❌ Not supported |
+| **Cold Start** | ⚠️ Slightly higher (configurable) | ✅ Optimized |
+| **Flex Consumption Plan** | ✅ Supported | ❌ Not supported |
+| **.NET Aspire** | ✅ Preview support | ❌ Not supported |
+
+### In-Process Model Limitations
+
+The in-process model has several limitations that make the isolated worker model the recommended choice:
+
+1. **End of Support**: The in-process model will reach end of support on November 10, 2026. After this date, no security updates or bug fixes will be provided.
+
+2. **Limited .NET Version Support**: Only supports LTS versions of .NET, ending with .NET 8. Cannot use newer .NET versions or .NET Framework.
+
+3. **Assembly Version Conflicts**: Because your code runs in the same process as the Functions host, you may encounter assembly version conflicts with host dependencies.
+
+4. **No Middleware Support**: Cannot use ASP.NET Core middleware patterns for cross-cutting concerns like authentication, logging, or error handling.
+
+5. **Limited Dependency Injection**: Requires using `FunctionsStartup` attribute rather than standard .NET patterns.
+
+6. **No ASP.NET Core Integration**: Cannot use familiar ASP.NET Core types like `HttpRequest` and `IActionResult` with full feature support.
+
+7. **Platform Limitations**: Not supported on Flex Consumption plan and cannot use .NET Aspire integration.
+
+### Benefits of Isolated Worker Model
+
+The isolated worker model provides significant advantages:
+
+- **Fewer Conflicts**: Your code runs in a separate process, eliminating assembly conflicts with the host.
+- **Full Process Control**: Control startup, configuration, and middleware through standard `Program.cs`.
+- **Standard Dependency Injection**: Use familiar .NET dependency injection patterns.
+- **.NET Version Flexibility**: Use any supported .NET version, including STS releases and .NET Framework.
+- **Better Observability**: Enhanced logging and telemetry control.
+- **Future-Proof**: All new features and improvements target the isolated model.
+
+### Migration Path
+
+If you're currently using the in-process model, we strongly recommend migrating to the isolated worker model. The migration involves:
+
+1. Updating project dependencies
+2. Adding a `Program.cs` file
+3. Updating function signatures and attributes
+4. Updating `local.settings.json`
+
+For detailed migration instructions, see the [Migration Guide](./migration-guide.md).
+
+---
+
 ## Function Types
 
 > **Important:** To successfully build durable applications, you must understand the constraints and patterns of the [Programming Model](./programming-model.md).
@@ -327,6 +392,7 @@ func start
 - [Quickstart: Create your first Durable Function](./quickstart.md)
 - **[Programming Model](./programming-model.md)**
 - [Storage Providers](./storage-providers.md)
+- [Migration Guide: In-Process to Isolated](./migration-guide.md)
 - [Durable Functions Overview (Microsoft Learn)](https://learn.microsoft.com/azure/azure-functions/durable/)
 - [Configure Durable Task Scheduler](../durable-task-scheduler/setup.md)
 - [Orchestration Patterns](../patterns/index.md)
@@ -338,5 +404,6 @@ func start
 - [Create your first Durable Function →](./quickstart.md)
 - [Learn about the Programming Model →](./programming-model.md)
 - [Choose a Storage Provider →](./storage-providers.md)
+- [Migrate from In-Process to Isolated →](./migration-guide.md)
 - [Explore Orchestration Patterns →](../patterns/index.md)
 - [View Code Samples →](./samples.md)

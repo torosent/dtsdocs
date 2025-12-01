@@ -303,6 +303,9 @@ Current limitations (as of November 2025):
 - [Setup Guide →](./setup.md)
 - [Dashboard Guide →](./dashboard.md)
 - [Identity Configuration →](./identity.md)
+- [Auto-Purge Retention Policies →](./auto-purge.md)
+- [Pricing & SKUs →](./pricing.md)
+- [Troubleshooting →](./troubleshooting.md)
 - [Durable Functions Integration →](../durable-functions/overview.md)
 - [Durable Task SDKs →](../sdks/overview.md)
 
@@ -313,3 +316,5 @@ Current limitations (as of November 2025):
 - [Set up your first Scheduler →](./setup.md)
 - [Configure managed identity →](./identity.md)
 - [Explore the monitoring dashboard →](./dashboard.md)
+- [Configure auto-purge policies →](./auto-purge.md)
+- [Understand pricing options →](./pricing.md)

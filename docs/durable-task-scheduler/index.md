@@ -25,3 +25,6 @@ The Durable Task Scheduler is a fully managed Azure service for running durable 
 | [Setup Guide](setup/) | Create and configure resources |
 | [Dashboard](dashboard/) | Monitor your orchestrations |
 | [Identity Configuration](identity/) | Configure managed identity access |
+| [Auto-Purge](auto-purge/) | Configure retention policies |
+| [Pricing & SKUs](pricing/) | Understand pricing and capacity options |
+| [Troubleshooting](troubleshooting/) | Diagnose and resolve common issues |

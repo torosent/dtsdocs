@@ -143,6 +143,7 @@ Filter orchestrations by:
 - **Status**: Running, Completed, Failed, Suspended, Terminated
 - **Time range**: Created or updated within a time window
 - **Instance ID**: Search for specific instances
+- **Metadata**: Filter by orchestration metadata
 
 ### Orchestration Details
 
@@ -154,7 +155,7 @@ Click an orchestration to see:
 - Current status and any error messages
 
 #### Timeline Tab
-Visual representation of execution:
+Visual representation of execution showing activity progression and timing:
 
 ```
 Start ──▶ Activity1 ──▶ Activity2 ──▶ Activity3 ──▶ Complete
@@ -162,8 +163,21 @@ Start ──▶ Activity1 ──▶ Activity2 ──▶ Activity3 ──▶ Comp
   0s        0.5s         1.2s         2.1s           3.0s
 ```
 
+The Timeline view is particularly useful for:
+- Visualizing retry patterns (see activities that retried)
+- Understanding time spent between activities
+- Identifying performance bottlenecks
+
+**Example: Retry Visualization**
+
+In a "ProcessDocument" orchestration, if the "WriteDoc" activity retried three times with 5-second intervals:
+
+```
+WriteDoc (attempt 1) ──✗── 5s ──▶ WriteDoc (attempt 2) ──✗── 5s ──▶ WriteDoc (attempt 3) ──✗
+```
+
 #### History Tab
-Complete event history:
+Complete event history with timestamps and payloads:
 
 | Event | Time | Details |
 |-------|------|---------|
@@ -172,6 +186,17 @@ Complete event history:
 | TaskCompleted | 120ms | Result: true |
 | TaskScheduled | 125ms | Activity: ProcessPayment |
 | ... | ... | ... |
+
+#### Sequence Tab
+Another way of visualizing event sequence, showing the order of operations.
+
+### Viewing Inputs and Outputs
+
+The dashboard allows you to inspect:
+- **Orchestration inputs**: Data passed when starting the orchestration
+- **Orchestration outputs**: Final result returned
+- **Activity inputs**: Parameters passed to each activity
+- **Activity outputs**: Results returned from each activity
 
 ---
 

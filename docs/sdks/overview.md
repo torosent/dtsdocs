@@ -69,11 +69,12 @@ The Durable Task SDKs connect directly to the Durable Task Scheduler, allowing y
 | Aspect | Durable Task SDKs | Durable Functions |
 |--------|-------------------|-------------------|
 | **Hosting** | Any compute platform | Azure Functions |
+| **Backend Options** | Durable Task Scheduler only | Azure Storage, MSSQL, Netherite, DTS |
 | **Programming Model** | Standalone library | Functions extension |
 | **Triggers** | Custom (HTTP, timers, etc.) | Functions bindings |
 | **Scaling** | Manual or platform-specific | Functions auto-scaling |
 | **Language Support** | .NET, Python, Java | C#, JS, Python, Java, PowerShell |
-| **Entity Functions** | Limited | Full support |
+| **Entity Functions** | ✅ Full support | ✅ Full support |
 
 ---
 
@@ -91,7 +92,7 @@ The Durable Task SDKs connect directly to the Durable Task Scheduler, allowing y
 - **Serverless scenarios** — Pay-per-execution pricing
 - **Azure integrations** — Leverage Functions bindings
 - **Multi-language teams** — PowerShell support
-- **Full entity support** — Complex entity scenarios
+
 
 ---
 

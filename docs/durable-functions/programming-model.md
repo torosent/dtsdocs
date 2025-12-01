@@ -19,6 +19,9 @@ permalink: /docs/durable-functions/programming-model/
 
 Durable Functions extends Azure Functions with a stateful programming model. This model allows you to write workflows (orchestrations) and stateful entities using code.
 
+{: .warning }
+> **Important for .NET Developers:** Support for the in-process model ends on **November 10, 2026**. This documentation focuses on the **isolated worker model**, which is the recommended approach for all new and existing .NET projects. If you're using the in-process model, see our [Migration Guide](./migration-guide.md).
+
 ---
 
 ## Triggers and Bindings
