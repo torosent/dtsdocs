@@ -247,6 +247,7 @@ public class OrderFunctions
 
 ### Python
 
+{% raw %}
 ```python
 import azure.functions as func
 import azure.durable_functions as df
@@ -286,6 +287,7 @@ def process_payment(order: dict):
 def ship_order(order: dict):
     pass
 ```
+{% endraw %}
 
 ---
 
@@ -341,6 +343,7 @@ az functionapp deployment source config-zip \
 
 ### GitHub Actions
 
+{% raw %}
 ```yaml
 name: Deploy Functions
 
@@ -372,6 +375,7 @@ jobs:
           package: ./publish
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
 ```
+{% endraw %}
 
 ---
 

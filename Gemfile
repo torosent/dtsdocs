@@ -1,11 +1,10 @@
 source "https://rubygems.org"
 
-gem "jekyll", "~> 4.3"
-gem "just-the-docs", "~> 0.8"
+# Use github-pages gem for GitHub Pages compatibility
+gem "github-pages", group: :jekyll_plugins
 
+# Additional plugins
 group :jekyll_plugins do
-  gem "jekyll-seo-tag"
-  gem "jekyll-github-metadata"
   gem "jekyll-include-cache"
 end
 
