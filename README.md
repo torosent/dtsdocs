@@ -13,7 +13,7 @@ This proposal aims to consolidate these under a single **Azure Durable** brand, 
 3.  **Backend as a Product**: The **Durable Task Scheduler (DTS)** is elevated to a top-level product section. This highlights its role not just as an implementation detail, but as a premier, managed service for orchestration state management.
 4.  **Pattern Reuse**: Architectural patterns (Fan-out/Fan-in, Chaining) are identical across platforms. Shared pattern documentation reduces maintenance and ensures consistency.
 
-## Proposed Structure & Reasoning
+## Documentation Structure
 
 The documentation is organized into the following logical sections:
 
@@ -22,15 +22,22 @@ The documentation is organized into the following logical sections:
 *   **Content**: Orchestrators, Activities, Entities, State Management, Error Handling, Versioning, Task Hubs, Code Constraints, and more.
 *   **Reasoning**: Users often struggle with the "magic" of replay history or the constraints of deterministic code. Defining these once creates a shared vocabulary for both DF and SDK users.
 
-### 2. Azure Durable Functions (`docs/durable-functions/`)
-**The "Serverless Path"**
-*   **Content**: Overview, Quickstart, Programming Model, Storage Providers, Samples.
-*   **Reasoning**: This section focuses on the Azure Functions extension. It includes storage provider configuration because DF offers the unique flexibility of "Bring Your Own Backend" (Azure Storage, MSSQL, Netherite, DTS), unlike the SDKs which primarily target DTS.
+### 2. Developer Guide (`docs/developer-guide/`)
+**The "How-To Code"**
+*   **Content**: Language-specific guides, SDK references, and programming models.
+*   **Subsections**:
+    *   `azure-functions/`: Specifics for the Azure Functions extension.
+    *   `sdks/`: Guides for the portable Durable Task Client libraries (.NET, Java, Python, Node.js).
+*   **Reasoning**: Focuses on the developer experience—how to write orchestrations and activities in your preferred language.
 
-### 3. Durable Task SDKs (`docs/sdks/`)
-**The "Portable Path"**
-*   **Content**: Overview, Quickstart, .NET, Python, Java client libraries, Samples.
-*   **Reasoning**: For users running on Azure Container Apps (ACA), Kubernetes (AKS), or on-premises. This section focuses on the libraries that allow durable execution *without* the Azure Functions host.
+### 3. Hosting Options (`docs/hosting-options/`)
+**The "Where-To Run"**
+*   **Content**: Deployment guides for various compute platforms.
+*   **Subsections**:
+    *   `azure-functions/`: Running on the Azure Functions service (Serverless/Dedicated).
+    *   `container-apps/`: Running on Azure Container Apps (ACA).
+    *   `kubernetes/`: Running on Azure Kubernetes Service (AKS) or generic K8s.
+*   **Reasoning**: Separates the "code" from the "infrastructure". You can run the same code in different places.
 
 ### 4. Durable Task Scheduler (`docs/durable-task-scheduler/`)
 **The "Managed Backend"**
@@ -38,7 +45,7 @@ The documentation is organized into the following logical sections:
 *   **Reasoning**: DTS is a standalone Azure service. It requires its own guide for provisioning, monitoring, security, pricing, and troubleshooting distinct from the compute platform that connects to it.
 
 ### 5. Patterns (`docs/patterns/`)
-**The "How-To"**
+**The "Standard Library"**
 *   **Content**: Function Chaining, Fan-out/Fan-in, Async HTTP APIs, Human Interaction, External Events, Aggregator.
 *   **Reasoning**: These patterns are the "standard library" of durable execution. Centralizing them prevents "dialect" fragmentation between languages and platforms.
 
@@ -85,21 +92,40 @@ docs/
 │   ├── app-hosting.md         # Hosting options
 │   └── backend-providers.md   # Backend storage options
 │
-├── durable-functions/         # Azure Functions extension (Serverless)
-│   ├── overview.md            # DF specific introduction
-│   ├── quickstart.md          # Create your first Durable Function
-│   ├── programming-model.md   # Triggers, bindings, and constraints
-│   ├── storage-providers.md   # Configuring Azure Storage, MSSQL, Netherite, DTS
-│   └── samples.md             # Code examples
+├── developer-guide/           # How to write code
+│   ├── index.md               # Guide landing page
+│   ├── quickstart.md          # General quickstart
+│   ├── dotnet.md              # .NET guide
+│   ├── python.md              # Python guide
+│   ├── java.md                # Java guide
+│   ├── samples.md             # Code samples
+│   ├── azure-functions/       # DF specific docs
+│   │   ├── index.md
+│   │   ├── bindings.md
+│   │   ├── host-json.md
+│   │   └── http-api.md
+│   └── sdks/                  # Portable SDK docs
+│       ├── index.md
+│       ├── dotnet/
+│       ├── java/
+│       ├── nodejs/
+│       └── python/
 │
-├── sdks/                      # Durable Task Client Libraries (Portable)
-│   ├── index.md               # SDK landing page
-│   ├── overview.md            # SDK introduction
-│   ├── quickstart.md          # Create your first portable worker
-│   ├── dotnet.md              # .NET SDK guide
-│   ├── python.md              # Python SDK guide
-│   ├── java.md                # Java SDK guide
-│   └── samples.md             # Code examples
+├── hosting-options/           # Where to run code
+│   ├── index.md
+│   ├── azure-functions/       # Hosting on Azure Functions
+│   │   ├── index.md
+│   │   ├── deployment.md
+│   │   ├── scaling.md
+│   │   └── storage-providers.md
+│   ├── container-apps/        # Hosting on ACA
+│   │   ├── index.md
+│   │   ├── deployment.md
+│   │   └── scaling.md
+│   └── kubernetes/            # Hosting on K8s
+│       ├── index.md
+│       ├── deployment.md
+│       └── scaling.md
 │
 ├── durable-task-scheduler/    # The managed backend service
 │   ├── index.md               # DTS landing page
@@ -139,8 +165,8 @@ docs/
 | Section | Content |
 |:--------|:--------|
 | **Concepts** | 17 concept documents covering orchestrators, activities, entities, state management, error handling, versioning, task hubs, and more. |
-| **Durable Functions** | Overview, Quickstart, Programming Model, Storage Providers, and Samples. |
-| **SDKs** | Overview, Quickstart, and language-specific guides for .NET, Python, and Java. |
+| **Developer Guide** | Language-specific guides, SDK references, and programming models for both DF and portable SDKs. |
+| **Hosting Options** | Deployment guides for Azure Functions, Container Apps, and Kubernetes. |
 | **DTS** | Overview, Setup, Dashboard, Identity management, Auto-Purge, Pricing & SKUs, and Troubleshooting guides. |
 | **Patterns** | 6 architectural patterns including chaining, fan-out/fan-in, and human interaction. |
 | **Architecture** | Deployment guides for Durable Functions, Container Apps, and AKS. |

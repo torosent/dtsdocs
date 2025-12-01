@@ -29,41 +29,25 @@ Azure Durable technologies can be deployed on various compute platforms, each wi
 
 ## Architecture Patterns
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                    DEPLOYMENT ARCHITECTURES                       │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│   ┌─────────────────────────────────────────────────────────────┐│
-│   │  SERVERLESS (Azure Functions)                               ││
-│   │                                                              ││
-│   │    Triggers ──► Functions App ──► Durable Task Scheduler    ││
-│   │    (HTTP, Queue,    (Scale to zero)                         ││
-│   │     Event Grid)                                             ││
-│   └─────────────────────────────────────────────────────────────┘│
-│                                                                   │
-│   ┌─────────────────────────────────────────────────────────────┐│
-│   │  CONTAINERIZED (Azure Container Apps)                       ││
-│   │                                                              ││
-│   │    ┌────────────┐   ┌────────────┐   ┌──────────────────┐   ││
-│   │    │  API App   │──►│  Worker    │──►│ Durable Task     │   ││
-│   │    │            │   │  App       │   │ Scheduler        │   ││
-│   │    └────────────┘   └────────────┘   └──────────────────┘   ││
-│   │                                                              ││
-│   └─────────────────────────────────────────────────────────────┘│
-│                                                                   │
-│   ┌─────────────────────────────────────────────────────────────┐│
-│   │  KUBERNETES (AKS)                                           ││
-│   │                                                              ││
-│   │    ┌────────────┐   ┌────────────┐   ┌──────────────────┐   ││
-│   │    │  Ingress   │──►│  Worker    │──►│ Durable Task     │   ││
-│   │    │  + API     │   │  Pods      │   │ Scheduler        │   ││
-│   │    │  Pods      │   │  (HPA)     │   │                  │   ││
-│   │    └────────────┘   └────────────┘   └──────────────────┘   ││
-│   │                                                              ││
-│   └─────────────────────────────────────────────────────────────┘│
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Serverless["SERVERLESS (Azure Functions)"]
+        direction LR
+        T1["Triggers<br/>(HTTP, Queue,<br/>Event Grid)"] --> FA["Functions App<br/>(Scale to zero)"]
+        FA --> DTS1["Durable Task<br/>Scheduler"]
+    end
+    
+    subgraph Container["CONTAINERIZED (Azure Container Apps)"]
+        direction LR
+        API["API App"] --> Worker["Worker App"]
+        Worker --> DTS2["Durable Task<br/>Scheduler"]
+    end
+    
+    subgraph K8s["KUBERNETES (AKS)"]
+        direction LR
+        Ingress["Ingress<br/>+ API Pods"] --> Pods["Worker Pods<br/>(HPA)"]
+        Pods --> DTS3["Durable Task<br/>Scheduler"]
+    end
 ```
 
 ---
@@ -72,45 +56,38 @@ Azure Durable technologies can be deployed on various compute platforms, each wi
 
 ### Compute Platforms
 
+{: .note }
+> For comprehensive deployment guides, scaling documentation, and quickstarts, see the [Hosting Options](../hosting-options/index.md) section.
+
 - [Durable Functions with Durable Task Scheduler](durable-functions-dts.md)  
-  Use Azure Functions with the managed Durable Task Scheduler backend
+  Use Azure Functions with the managed Durable Task Scheduler backend  
+  → [Full Azure Functions Guide](../hosting-options/azure-functions/index.md)
 
 - [Azure Container Apps with Durable Task SDK](aca-dts.md)  
-  Deploy containerized workers on Azure Container Apps
+  Deploy containerized workers on Azure Container Apps  
+  → [Full Container Apps Guide](../hosting-options/container-apps/index.md)
 
 - [Azure Kubernetes Service with Durable Task SDK](aks-dts.md)  
-  Full Kubernetes deployment with scaling and observability
+  Full Kubernetes deployment with scaling and observability  
+  → [Full Kubernetes Guide](../hosting-options/kubernetes/index.md)
 
 ---
 
 ## Choosing Your Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  ARCHITECTURE DECISION TREE                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  "Do you need scale-to-zero?"                                   │
-│      │                                                           │
-│      ├── Yes ──► Azure Functions                                │
-│      │           (with Durable Task Scheduler)                  │
-│      │                                                           │
-│      └── No ───► "Do you need container flexibility?"           │
-│                       │                                          │
-│                       ├── Yes, but simple ──► Azure Container   │
-│                       │                        Apps             │
-│                       │                                          │
-│                       └── Yes, full control ──► AKS             │
-│                                                                  │
-│  "Do you have existing infrastructure?"                         │
-│      │                                                           │
-│      ├── Kubernetes ──► AKS with Durable Task SDK              │
-│      │                                                           │
-│      ├── VMs ────────► VM with Durable Task SDK                │
-│      │                                                           │
-│      └── None ───────► Azure Functions (fastest start)         │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Q1{"Do you need<br/>scale-to-zero?"}
+    Q1 -->|Yes| AF["Azure Functions<br/>(with Durable Task Scheduler)"]
+    Q1 -->|No| Q2{"Do you need<br/>container flexibility?"}
+    
+    Q2 -->|Yes, but simple| ACA["Azure Container Apps"]
+    Q2 -->|Yes, full control| AKS["AKS"]
+    Q2 -->|No| Q3{"Do you have existing<br/>infrastructure?"}
+    
+    Q3 -->|Kubernetes| AKS2["AKS with Durable Task SDK"]
+    Q3 -->|VMs| VM["VM with Durable Task SDK"]
+    Q3 -->|None| AF2["Azure Functions<br/>(fastest start)"]
 ```
 
 ---
@@ -140,6 +117,11 @@ Azure Durable technologies can be deployed on various compute platforms, each wi
 
 Choose your deployment architecture:
 
-- [Durable Functions + DTS →](durable-functions-dts.md)
-- [Container Apps + DTS →](aca-dts.md)  
-- [AKS + DTS →](aks-dts.md)
+- [Hosting Options Overview →](../hosting-options/index.md)
+- [Azure Functions (Durable Functions) →](../hosting-options/azure-functions/index.md)
+- [Container Apps →](../hosting-options/container-apps/index.md)  
+- [Azure Kubernetes Service →](../hosting-options/kubernetes/index.md)
+
+For SDK development guides:
+
+- [Developer Guide →](../developer-guide/index.md)

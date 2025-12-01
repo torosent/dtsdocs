@@ -1,9 +1,10 @@
 ---
 layout: default
 title: Programming Model
-parent: Durable Functions
-nav_order: 3
-permalink: /docs/durable-functions/programming-model/
+parent: Azure Functions (Durable Functions)
+grand_parent: Hosting Options
+nav_order: 2
+permalink: /docs/hosting-options/azure-functions/programming-model/
 ---
 
 # Durable Functions Programming Model
@@ -116,7 +117,7 @@ Entities provide a way to define stateful objects. They are similar to actors in
 
 ## Next Steps
 
-- [Learn about Orchestrators →](../concepts/orchestrators.md)
-- [Learn about Activities →](../concepts/activities.md)
-- [Learn about Entities →](../concepts/entities.md)
-- [Explore Patterns →](../patterns/index.md)
+- [Learn about Orchestrators →](../../concepts/orchestrators.md)
+- [Learn about Activities →](../../concepts/activities.md)
+- [Learn about Entities →](../../concepts/entities.md)
+- [Explore Patterns →](../../patterns/index.md)

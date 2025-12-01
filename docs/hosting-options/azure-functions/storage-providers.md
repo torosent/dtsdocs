@@ -1,9 +1,10 @@
 ---
 layout: default
 title: Storage Providers
-parent: Durable Functions
-nav_order: 10
-permalink: /docs/durable-functions/storage-providers/
+parent: Azure Functions (Durable Functions)
+grand_parent: Hosting Options
+nav_order: 3
+permalink: /docs/hosting-options/azure-functions/storage-providers/
 ---
 
 # Durable Functions Storage Providers
@@ -21,13 +22,13 @@ Durable Functions is a set of Azure Functions triggers and bindings that are int
 
 > **Note**: The default Azure Storage provider for Durable Functions is the easiest to use since it requires no extra configuration. However, there are cost, scalability, and data management tradeoffs that may favor the use of an alternate backend provider.
 
-Durable Functions supports two types of backend providers: "Bring your own (BYO)" and Azure managed. The BYO options include Azure Storage, Netherite, and Microsoft SQL Server (MSSQL). The Azure managed option is the new durable task scheduler currently in preview.
+Durable Functions supports two types of backend providers: "Bring your own (BYO)" and Azure managed. The BYO options include Azure Storage, Netherite, and Microsoft SQL Server (MSSQL). The Azure managed option is the new durable task scheduler.
 
 > **Note**: It's not currently possible to migrate data from one storage backend provider to another. If you want to use a new provider, you should create a new app configured with the new provider.
 
 ---
 
-## Durable Task Scheduler (Preview)
+## Durable Task Scheduler
 
 The durable task scheduler is a fully managed, high performance backend provider for Durable Functions. It was designed and built from scratch with help from Microsoft Research. This new provider aims to provide the best user experience in aspects such as management, observability, performance, and security.
 
@@ -40,7 +41,7 @@ The key benefits of the durable task scheduler include:
 
 Existing Durable Functions users can leverage the scheduler with no code changes.
 
-[Learn more about the Durable Task Scheduler](../durable-task-scheduler/overview.md)
+[Learn more about the Durable Task Scheduler](../../durable-task-scheduler/overview.md)
 
 ---
 
@@ -155,5 +156,5 @@ The key benefits of the MSSQL storage provider include:
 
 ## Next Steps
 
-*   [Learn about Durable Functions performance and scale](../concepts/performance-scale.md)
-*   [Durable Task Scheduler Overview](../durable-task-scheduler/overview.md)
+*   [Learn about Durable Functions performance and scale](../../concepts/performance-scale.md)
+*   [Durable Task Scheduler Overview](../../durable-task-scheduler/overview.md)

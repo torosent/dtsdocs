@@ -1,9 +1,10 @@
 ---
 layout: default
 title: Quickstart
-parent: Durable Functions
-nav_order: 2
-permalink: /docs/durable-functions/quickstart/
+parent: Azure Functions (Durable Functions)
+grand_parent: Hosting Options
+nav_order: 1
+permalink: /docs/hosting-options/azure-functions/quickstart/
 ---
 
 # Quickstart: Create Your First Durable Function
@@ -265,6 +266,6 @@ You've created your first Durable Function! The orchestration:
 ## Next Steps
 
 - [Understand the Programming Model →](programming-model.md)
-- [Learn about Orchestrator Concepts →](../concepts/orchestrators.md)
-- [Explore Orchestration Patterns →](../patterns/index.md)
-- [Deploy to Azure →](../architecture/durable-functions-dts.md)
+- [Learn about Orchestrator Concepts →](../../concepts/orchestrators.md)
+- [Explore Orchestration Patterns →](../../patterns/index.md)
+- [Deploy to Azure →](deployment.md)

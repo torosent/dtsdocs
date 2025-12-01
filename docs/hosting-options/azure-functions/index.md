@@ -1,12 +1,13 @@
 ---
 layout: default
-title: Durable Functions
-nav_order: 3
+title: Azure Functions (Durable Functions)
+parent: Hosting Options
+nav_order: 1
 has_children: true
-permalink: /docs/durable-functions/
+permalink: /docs/hosting-options/azure-functions/
 ---
 
-# Azure Durable Functions
+# Azure Functions (Durable Functions)
 {: .no_toc }
 
 ## Table of contents
@@ -106,46 +107,6 @@ For .NET developers, Azure Functions supports two execution models. Understandin
 | **Cold Start** | ⚠️ Slightly higher (configurable) | ✅ Optimized |
 | **Flex Consumption Plan** | ✅ Supported | ❌ Not supported |
 | **.NET Aspire** | ✅ Preview support | ❌ Not supported |
-
-### In-Process Model Limitations
-
-The in-process model has several limitations that make the isolated worker model the recommended choice:
-
-1. **End of Support**: The in-process model will reach end of support on November 10, 2026. After this date, no security updates or bug fixes will be provided.
-
-2. **Limited .NET Version Support**: Only supports LTS versions of .NET, ending with .NET 8. Cannot use newer .NET versions or .NET Framework.
-
-3. **Assembly Version Conflicts**: Because your code runs in the same process as the Functions host, you may encounter assembly version conflicts with host dependencies.
-
-4. **No Middleware Support**: Cannot use ASP.NET Core middleware patterns for cross-cutting concerns like authentication, logging, or error handling.
-
-5. **Limited Dependency Injection**: Requires using `FunctionsStartup` attribute rather than standard .NET patterns.
-
-6. **No ASP.NET Core Integration**: Cannot use familiar ASP.NET Core types like `HttpRequest` and `IActionResult` with full feature support.
-
-7. **Platform Limitations**: Not supported on Flex Consumption plan and cannot use .NET Aspire integration.
-
-### Benefits of Isolated Worker Model
-
-The isolated worker model provides significant advantages:
-
-- **Fewer Conflicts**: Your code runs in a separate process, eliminating assembly conflicts with the host.
-- **Full Process Control**: Control startup, configuration, and middleware through standard `Program.cs`.
-- **Standard Dependency Injection**: Use familiar .NET dependency injection patterns.
-- **.NET Version Flexibility**: Use any supported .NET version, including STS releases and .NET Framework.
-- **Better Observability**: Enhanced logging and telemetry control.
-- **Future-Proof**: All new features and improvements target the isolated model.
-
-### Migration Path
-
-If you're currently using the in-process model, we strongly recommend migrating to the isolated worker model. The migration involves:
-
-1. Updating project dependencies
-2. Adding a `Program.cs` file
-3. Updating function signatures and attributes
-4. Updating `local.settings.json`
-
-For detailed migration instructions, see the [Migration Guide](./migration-guide.md).
 
 ---
 
@@ -294,8 +255,8 @@ For organizations preferring SQL Server:
 
 ### ⚠️ Consider Alternatives
 
-- **Container-based workloads** — Consider Durable Task SDKs on ACA/AKS
-- **Custom hosting requirements** — Consider Durable Task SDKs
+- **Container-based workloads** — Consider [Azure Container Apps](../container-apps/) with Durable Task SDKs
+- **Custom hosting requirements** — Consider [AKS](../kubernetes/) with Durable Task SDKs
 - **Non-Azure deployments** — Consider Durable Task SDKs
 
 ---
@@ -373,7 +334,7 @@ func start
 
 ---
 
-## Hosting Options
+## Hosting Plans
 
 | Hosting Plan | Description | Scale |
 |--------------|-------------|-------|
@@ -385,15 +346,25 @@ func start
 
 ---
 
+## In This Section
+
+| Guide | Description |
+|:------|:------------|
+| [Quickstart](quickstart.md) | Create your first Durable Function |
+| [Programming Model](programming-model.md) | Understand triggers, bindings, and constraints |
+| [Storage Providers](storage-providers.md) | Configure storage backends |
+| [Deployment Guide](deployment.md) | Deploy to Azure |
+| [Scaling](scaling.md) | Configure scaling and performance |
+| [Migration Guide](migration-guide.md) | Migrate from in-process to isolated |
+| [Samples](samples.md) | Code samples and examples |
+
+---
+
 ## Related Documentation
 
-- [Quickstart: Create your first Durable Function](./quickstart.md)
-- **[Programming Model](./programming-model.md)**
-- [Storage Providers](./storage-providers.md)
-- [Migration Guide: In-Process to Isolated](./migration-guide.md)
 - [Durable Functions Overview (Microsoft Learn)](https://learn.microsoft.com/azure/azure-functions/durable/)
-- [Configure Durable Task Scheduler](../durable-task-scheduler/setup.md)
-- [Orchestration Patterns](../patterns/index.md)
+- [Configure Durable Task Scheduler](../../durable-task-scheduler/setup.md)
+- [Orchestration Patterns](../../patterns/index.md)
 
 ---
 
@@ -403,5 +374,4 @@ func start
 - [Learn about the Programming Model →](./programming-model.md)
 - [Choose a Storage Provider →](./storage-providers.md)
 - [Migrate from In-Process to Isolated →](./migration-guide.md)
-- [Explore Orchestration Patterns →](../patterns/index.md)
-- [View Code Samples →](./samples.md)
+- [Explore Orchestration Patterns →](../../patterns/index.md)

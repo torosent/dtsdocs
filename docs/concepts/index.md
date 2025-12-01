@@ -213,7 +213,6 @@ public async Task<string> SafeOrchestrator(TaskOrchestrationContext context)
 ### Advanced Topics
 - **[State Management](./state-management.md)** — Deep dive into event sourcing and replay
 - **[Data Persistence](./data-persistence.md)** — Serialization, payload sizes, and versioning
-- **[Schedules](./schedules.md)** — Define recurring orchestrations (.NET only)
 - **[Framework vs SDKs](./framework-vs-sdk.md)** — Understand the difference between DTFx and the client libraries
 
 ---

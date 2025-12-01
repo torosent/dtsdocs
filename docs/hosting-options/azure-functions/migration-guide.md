@@ -1,9 +1,10 @@
 ---
 layout: default
 title: Migration Guide
-parent: Durable Functions
-nav_order: 15
-permalink: /docs/durable-functions/migration-guide/
+parent: Azure Functions (Durable Functions)
+grand_parent: Hosting Options
+nav_order: 6
+permalink: /docs/hosting-options/azure-functions/migration-guide/
 ---
 
 # Migration Guide: In-Process to Isolated Worker Model
@@ -58,7 +59,7 @@ Before starting the migration:
 - **Azure Functions Core Tools v4.x** or later
 - **.NET 8.0 SDK** (or your target .NET version)
 - **Visual Studio 2022** or **VS Code with Azure Functions extension**
-- Familiarity with [Durable Functions concepts](../concepts/orchestrators.md)
+- Familiarity with [Durable Functions concepts](../../concepts/orchestrators.md)
 
 ---
 
@@ -416,43 +417,6 @@ public class CounterEntity
 }
 ```
 
-### Logging Pattern Changes
-
-The isolated worker model uses dependency injection for logging:
-
-**Before (In-Process):**
-
-```csharp
-public static class MyFunctions
-{
-    [FunctionName("MyFunction")]
-    public static void Run([TimerTrigger("0 */5 * * * *")] TimerInfo timer, ILogger log)
-    {
-        log.LogInformation("Timer triggered");
-    }
-}
-```
-
-**After (Isolated Worker):**
-
-```csharp
-public class MyFunctions
-{
-    private readonly ILogger<MyFunctions> _logger;
-    
-    public MyFunctions(ILogger<MyFunctions> logger)
-    {
-        _logger = logger;
-    }
-    
-    [Function(nameof(MyFunction))]
-    public void Run([TimerTrigger("0 */5 * * * *")] TimerInfo timer)
-    {
-        _logger.LogInformation("Timer triggered");
-    }
-}
-```
-
 ---
 
 ## Step 6: Update local.settings.json
@@ -626,8 +590,8 @@ Use this checklist to ensure a complete migration:
 ## Next Steps
 
 - [Learn about the Isolated Worker Model →](https://learn.microsoft.com/azure/azure-functions/dotnet-isolated-process-guide)
-- [Explore Durable Functions Patterns →](../patterns/index.md)
-- [Configure Durable Task Scheduler →](../durable-task-scheduler/setup.md)
+- [Explore Durable Functions Patterns →](../../patterns/index.md)
+- [Configure Durable Task Scheduler →](../../durable-task-scheduler/setup.md)
 - [View Code Samples →](./samples.md)
 
 ---

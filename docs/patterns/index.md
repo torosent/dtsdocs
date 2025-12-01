@@ -154,3 +154,11 @@ public ApprovalResult run(TaskOrchestrationContext ctx) {
 - [Human Interaction →](human-interaction.md)
 - [Aggregator →](aggregator.md)
 - [External Events →](external-events.md)
+
+---
+
+## Related Resources
+
+- [Developer Guide →](../developer-guide/index.md) - SDK documentation for .NET, Python, and Java
+- [Hosting Options →](../hosting-options/index.md) - Deploy to Azure Functions, Container Apps, or Kubernetes
+- [Samples →](../developer-guide/samples.md) - Complete code examples

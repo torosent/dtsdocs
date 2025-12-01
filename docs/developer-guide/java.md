@@ -1,9 +1,9 @@
 ---
 layout: default
 title: Java SDK (Preview)
-parent: Durable Task SDKs
+parent: Developer Guide
 nav_order: 4
-permalink: /docs/sdks/java/
+permalink: /docs/developer-guide/java/
 ---
 
 # Java Durable Task SDK (Preview)
@@ -691,6 +691,7 @@ DurableTaskSchedulerClientOptions options = new DurableTaskSchedulerClientOption
 
 ## Next Steps
 
-- [View Java Samples →](../samples/java/index.md)
-- [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
+- [View Samples →](./samples.md)
+- [Deploy to Azure Container Apps →](../hosting-options/container-apps/index.md)
+- [Deploy to Azure Kubernetes Service →](../hosting-options/kubernetes/index.md)
 - [Explore Patterns →](../patterns/index.md)

@@ -23,9 +23,9 @@ Azure Durable is Microsoft's durable execution platform:
 
 | Component | Description | Best For |
 |-----------|-------------|----------|
-| **[Azure Durable Functions](./durable-functions/overview.md)** | Serverless stateful workflows on Azure Functions | Event-driven, pay-per-execution workloads |
 | **[Durable Task Scheduler](./durable-task-scheduler/overview.md)** | Fully managed orchestration backend | Production workloads requiring high performance |
-| **[Durable Task SDKs](./sdks/overview.md)** | Portable libraries for any compute platform | Container-based and on-premises deployments |
+| **[Hosting Options](./hosting-options/index.md)** | Azure Functions, Container Apps, or Kubernetes | Choose based on your deployment needs |
+| **[Developer Guide](./developer-guide/index.md)** | SDKs for .NET, Python, and Java | Build orchestrations in your preferred language |
 
 ---
 
@@ -34,8 +34,9 @@ Azure Durable is Microsoft's durable execution platform:
 | I want to... | Go to... |
 |--------------|----------|
 | **Understand the concepts** | [📘 Core Concepts](./concepts/index.md) |
-| **Build serverless workflows** | [⚡ Durable Functions Quickstart](./durable-functions/quickstart.md) |
-| **Run on containers/Kubernetes** | [🔧 SDK Quickstart](./sdks/quickstart.md) |
+| **Choose a hosting platform** | [🏠 Hosting Options](./hosting-options/index.md) |
+| **Build serverless workflows** | [⚡ Azure Functions Quickstart](./hosting-options/azure-functions/quickstart.md) |
+| **Run on containers/Kubernetes** | [🔧 Developer Guide Quickstart](./developer-guide/quickstart.md) |
 | **Learn orchestration patterns** | [🔄 Patterns](./patterns/index.md) |
 | **Choose the right approach** | [⚖️ When to Use What](./comparison/when-to-use.md) |
 | **Set up the managed backend** | [☁️ Durable Task Scheduler](./durable-task-scheduler/overview.md) |
@@ -47,7 +48,7 @@ Azure Durable is Microsoft's durable execution platform:
 
 Choose your path based on your deployment needs:
 
-### Option 1: Durable Functions (Serverless)
+### Option 1: Azure Functions (Serverless)
 
 **Best for:** Event-driven workloads, pay-per-execution, Azure-native development
 
@@ -58,11 +59,23 @@ cd MyDurableFunctionsApp
 dotnet add package Microsoft.Azure.Functions.Worker.Extensions.DurableTask
 ```
 
-[📖 Durable Functions Quickstart →](./durable-functions/quickstart.md)
+[📖 Azure Functions Quickstart →](./hosting-options/azure-functions/quickstart.md)
 
-### Option 2: Durable Task SDKs (Portable)
+### Option 2: Azure Container Apps
 
-**Best for:** Container-based deployments, Kubernetes, on-premises, multi-cloud
+**Best for:** Containerized microservices, KEDA autoscaling, no Kubernetes management
+
+[📖 Container Apps Deployment Guide →](./hosting-options/container-apps/deployment.md)
+
+### Option 3: Azure Kubernetes Service
+
+**Best for:** Full orchestration control, existing Kubernetes infrastructure
+
+[📖 Kubernetes Deployment Guide →](./hosting-options/kubernetes/deployment.md)
+
+### Durable Task SDKs (All Platforms)
+
+**Best for:** Building orchestrations in .NET, Python, or Java
 
 ```bash
 # .NET
@@ -75,30 +88,26 @@ pip install durabletask-azure
 # Java - Add to pom.xml
 ```
 
-[📖 Durable Task SDKs Quickstart →](./sdks/quickstart.md)
+[📖 Developer Guide Quickstart →](./developer-guide/quickstart.md)
 
 ---
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     YOUR APPLICATION                            │
-│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐           │
-│  │ Orchestrator│──▶│  Activity   │──▶│  Activity   │           │
-│  └─────────────┘   └─────────────┘   └─────────────┘           │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│               DURABLE TASK SCHEDULER                            │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  • Automatic state persistence                            │  │
-│  │  • Fault tolerance & replay                               │  │
-│  │  • High throughput                                        │  │
-│  │  • Built-in monitoring dashboard                          │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph App["YOUR APPLICATION"]
+        direction LR
+        O[Orchestrator] --> A1[Activity]
+        A1 --> A2[Activity]
+    end
+
+    subgraph DTS["DURABLE TASK SCHEDULER"]
+        direction TB
+        Details["• Automatic state persistence<br/>• Fault tolerance & replay<br/>• High throughput<br/>• Built-in monitoring dashboard"]
+    end
+
+    App --> DTS
 ```
 
 **Key Benefits:**

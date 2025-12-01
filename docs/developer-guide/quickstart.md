@@ -1,9 +1,9 @@
 ---
 layout: default
 title: Quickstart
-parent: Durable Task SDKs
-nav_order: 2
-permalink: /docs/sdks/quickstart/
+parent: Developer Guide
+nav_order: 1
+permalink: /docs/developer-guide/quickstart/
 ---
 
 # Quickstart: Build a Portable Durable Worker
@@ -298,7 +298,8 @@ asyncio.run(main())
 - [Explore the .NET SDK →](./dotnet.md)
 - [Explore the Python SDK →](./python.md)  
 - [Explore the Java SDK →](./java.md)
-- [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
+- [Deploy to Azure Container Apps →](../hosting-options/container-apps/index.md)
+- [Deploy to Azure Kubernetes Service →](../hosting-options/kubernetes/index.md)
 - [Explore Orchestration Patterns →](../patterns/index.md)
 
 ---

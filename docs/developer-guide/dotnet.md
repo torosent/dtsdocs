@@ -1,9 +1,9 @@
 ---
 layout: default
 title: .NET SDK
-parent: Durable Task SDKs
+parent: Developer Guide
 nav_order: 2
-permalink: /docs/sdks/dotnet/
+permalink: /docs/developer-guide/dotnet/
 ---
 
 # .NET Durable Task SDK
@@ -501,6 +501,7 @@ app.Run();
 
 ## Next Steps
 
-- [View .NET Samples →](./samples.md)
-- [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
+- [View Samples →](./samples.md)
+- [Deploy to Azure Container Apps →](../hosting-options/container-apps/index.md)
+- [Deploy to Azure Kubernetes Service →](../hosting-options/kubernetes/index.md)
 - [Explore Patterns →](../patterns/index.md)

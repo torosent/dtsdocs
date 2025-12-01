@@ -1,8 +1,10 @@
 ---
 layout: default
 title: Samples
-parent: Durable Functions
-nav_order: 20
+parent: Azure Functions (Durable Functions)
+grand_parent: Hosting Options
+nav_order: 7
+permalink: /docs/hosting-options/azure-functions/samples/
 ---
 
 # Durable Functions Samples
@@ -69,7 +71,7 @@ public static async Task Run(
 
 ### Async HTTP APIs
 
-Implement the [Async HTTP API pattern](../patterns/index.md#async-http-apis) to handle long-running operations.
+Implement the [Async HTTP API pattern](../../patterns/async-http.md) to handle long-running operations.
 
 ## External Samples
 

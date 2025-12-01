@@ -1,9 +1,9 @@
 ---
 layout: default
 title: Python SDK
-parent: Durable Task SDKs
+parent: Developer Guide
 nav_order: 3
-permalink: /docs/sdks/python/
+permalink: /docs/developer-guide/python/
 ---
 
 # Python Durable Task SDK
@@ -670,6 +670,7 @@ client = DurableTaskSchedulerClient(
 
 ## Next Steps
 
-- [View Python Samples →](../samples/python/index.md)
-- [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
+- [View Samples →](./samples.md)
+- [Deploy to Azure Container Apps →](../hosting-options/container-apps/index.md)
+- [Deploy to Azure Kubernetes Service →](../hosting-options/kubernetes/index.md)
 - [Explore Patterns →](../patterns/index.md)

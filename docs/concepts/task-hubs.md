@@ -29,20 +29,22 @@ Think of a task hub as a namespace or a boundary. All storage resources (queues,
 - **Grouping**: All instances within a task hub can interact with each other (e.g., sub-orchestrations).
 - **Versioning**: You can use different task hubs to run different versions of your application side-by-side.
 
-```
-STORAGE ACCOUNT
-┌──────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│  ┌─────────────────────┐      ┌─────────────────────┐            │
-│  │   Task Hub: App1    │      │   Task Hub: App2    │            │
-│  │                     │      │                     │            │
-│  │  • App1History      │      │  • App2History      │            │
-│  │  • App1Instances    │      │  • App2Instances    │            │
-│  │  • App1WorkItems    │      │  • App2WorkItems    │            │
-│  │                     │      │                     │            │
-│  └─────────────────────┘      └─────────────────────┘            │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Storage["STORAGE ACCOUNT"]
+        direction LR
+        subgraph Hub1["Task Hub: App1"]
+            H1[App1History]
+            I1[App1Instances]
+            W1[App1WorkItems]
+        end
+        
+        subgraph Hub2["Task Hub: App2"]
+            H2[App2History]
+            I2[App2Instances]
+            W2[App2WorkItems]
+        end
+    end
 ```
 
 ---

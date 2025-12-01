@@ -1,9 +1,10 @@
 ---
 layout: default
 title: Schedules
-parent: Core Concepts
-nav_order: 14
-permalink: /docs/concepts/schedules/
+parent: .NET SDK
+grand_parent: SDKs
+nav_order: 7
+permalink: /developer-guide/sdks/dotnet/schedules/
 ---
 
 # Schedules
@@ -19,7 +20,8 @@ permalink: /docs/concepts/schedules/
 
 Schedules allow you to define recurring orchestrations that run on a predefined cadence. This is useful for batch jobs, periodic maintenance tasks, data synchronization, and other time-based workflows.
 
-> **Note**: Schedule support is currently available in the **.NET SDK only**. For other languages, see the [GitHub issues](#other-languages) section below to vote and share your use cases.
+{: .note }
+> Schedule support is currently available in the **.NET SDK only**. For other languages, see the [Other Languages](#other-languages) section below.
 
 ---
 
@@ -32,32 +34,28 @@ Schedules provide a way to:
 - **Track execution history** for scheduled runs
 - **Handle missed runs** with configurable policies
 
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                           SCHEDULE FLOW                                    │
-├────────────────────────────────────────────────────────────────────────────┤
-│                                                                            │
-│   Schedule Definition                  Scheduled Orchestrations            │
-│   ┌─────────────────────┐                                                  │
-│   │ Name: DailyCleanup  │              ┌───────────┐                       │
-│   │ Cron: 0 0 * * *     │──────────────▶│ Run 1     │ (Day 1, 00:00)       │
-│   │ Orchestrator:       │              └───────────┘                       │
-│   │   CleanupOrchestrat │              ┌───────────┐                       │
-│   │ Input: {...}        │──────────────▶│ Run 2     │ (Day 2, 00:00)       │
-│   └─────────────────────┘              └───────────┘                       │
-│                                        ┌───────────┐                       │
-│                                        │ Run 3     │ (Day 3, 00:00)       │
-│                                        └───────────┘                       │
-│                                              │                             │
-│                                              ▼                             │
-│                                        ... continues ...                   │
-│                                                                            │
-└────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph Schedule["Schedule Definition"]
+        SD[/"Name: DailyCleanup<br/>Cron: 0 0 * * *<br/>Orchestrator: CleanupOrchestrator<br/>Input: {...}"/]
+    end
+    
+    subgraph Runs["Scheduled Orchestrations"]
+        R1["Run 1<br/>(Day 1, 00:00)"]
+        R2["Run 2<br/>(Day 2, 00:00)"]
+        R3["Run 3<br/>(Day 3, 00:00)"]
+        RN["... continues ..."]
+    end
+    
+    SD --> R1
+    SD --> R2
+    SD --> R3
+    R3 --> RN
 ```
 
 ---
 
-## Creating a Schedule (.NET)
+## Creating a Schedule
 
 ### Basic Schedule
 
@@ -324,13 +322,13 @@ public class CleanupOrchestrator : TaskOrchestrator<CleanupInput, CleanupResult>
 
 ## Other Languages
 
-Schedule support for other languages is planned. Vote and share your use cases on these GitHub issues:
+Schedule support for other languages is planned. Vote and share your use cases on the GitHub repositories:
 
-| Language | GitHub Issue |
-|----------|--------------|
-| **Python** | [durabletask-python #XXX](https://github.com/microsoft/durabletask-python/issues) |
-| **Java** | [durabletask-java #XXX](https://github.com/microsoft/durabletask-java/issues) |
-| **JavaScript** | [durabletask-js #XXX](https://github.com/microsoft/durabletask-js/issues) |
+| Language | Repository |
+|----------|------------|
+| **Python** | [microsoft/durabletask-python](https://github.com/microsoft/durabletask-python/issues) |
+| **Java** | [microsoft/durabletask-java](https://github.com/microsoft/durabletask-java/issues) |
+| **JavaScript** | [Azure/azure-functions-durable-js](https://github.com/Azure/azure-functions-durable-js/issues) |
 
 ### Workaround for Other Languages
 
@@ -419,5 +417,5 @@ Check for:
 ## Next Steps
 
 - [View the ScheduleWebApp Sample →](https://github.com/Azure-Samples/Durable-Task-Scheduler/tree/main/samples/durable-task-sdks/dotnet/ScheduleWebApp)
-- [Learn about Orchestrators →](./orchestrators.md)
-- [Explore Instance Management →](./instance-management.md)
+- [Learn about Orchestrators →](../../../concepts/orchestrators)
+- [Explore Instance Management →](../../../concepts/instance-management)

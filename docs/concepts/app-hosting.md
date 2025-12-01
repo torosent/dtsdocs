@@ -28,31 +28,25 @@ Azure Durable orchestrations can run on multiple hosting platforms. This guide h
 | **[Azure Durable Functions](#azure-durable-functions)** | Event-driven, serverless workloads | Automatic | Pay-per-execution |
 | **[Durable Task SDKs](#durable-task-sdks-portable)** | Containers, Kubernetes, VMs | Manual or platform-managed | Compute-based |
 
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                          HOSTING OPTIONS                                   │
-├────────────────────────────────────────────────────────────────────────────┤
-│                                                                            │
-│   ┌─────────────────────────────┐    ┌─────────────────────────────┐      │
-│   │    AZURE DURABLE FUNCTIONS  │    │    DURABLE TASK SDKs        │      │
-│   │                             │    │                             │      │
-│   │  • Serverless               │    │  • Portable                 │      │
-│   │  • Auto-scaling             │    │  • Run anywhere             │      │
-│   │  • Triggers & Bindings      │    │  • Full host control        │      │
-│   │  • .NET In-Proc or Isolated │    │  • .NET, Python, Java       │      │
-│   │  • Python, JavaScript, Java │    │                             │      │
-│   │                             │    │                             │      │
-│   └──────────────┬──────────────┘    └──────────────┬──────────────┘      │
-│                  │                                   │                     │
-│                  └───────────────┬───────────────────┘                     │
-│                                  │                                         │
-│                                  ▼                                         │
-│                    ┌─────────────────────────────┐                         │
-│                    │   DURABLE TASK SCHEDULER    │                         │
-│                    │   (Backend)                 │                         │
-│                    └─────────────────────────────┘                         │
-│                                                                            │
-└────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Functions["Azure Durable Functions"]
+        F1["• Serverless"]
+        F2["• Auto-scaling"]
+        F3["• Triggers & Bindings"]
+        F4["• .NET In-Proc or Isolated"]
+        F5["• Python, JavaScript, Java"]
+    end
+    
+    subgraph SDKs["Durable Task SDKs"]
+        S1["• Portable"]
+        S2["• Run anywhere"]
+        S3["• Full host control"]
+        S4["• .NET, Python, Java"]
+    end
+    
+    Functions --> DTS["Durable Task Scheduler<br/>(Backend)"]
+    SDKs --> DTS
 ```
 
 ---
@@ -266,41 +260,19 @@ public class SayHelloActivity : TaskActivity<string, string>
 
 ## Decision Flowchart
 
-```
-                        ┌─────────────────────┐
-                        │ New Durable Project │
-                        └──────────┬──────────┘
-                                   │
-                    ┌──────────────▼──────────────┐
-                    │ Do you need serverless?     │
-                    │ (auto-scaling, pay-per-use) │
-                    └──────────────┬──────────────┘
-                                   │
-              ┌────────────────────┼────────────────────┐
-              │ Yes               │ No                  │
-              ▼                   ▼                     │
-   ┌─────────────────────┐  ┌─────────────────────┐    │
-   │ Azure Durable       │  │ Running on          │    │
-   │ Functions           │  │ Containers/K8s?     │    │
-   └──────────┬──────────┘  └──────────┬──────────┘    │
-              │                        │               │
-              │              ┌─────────┴─────────┐     │
-              │              │ Yes      │ No     │     │
-              │              ▼          ▼        │     │
-              │     ┌────────────┐ ┌────────────┐│     │
-              │     │ Durable    │ │ Either     ││     │
-              │     │ Task SDKs  │ │ Option     ││     │
-              │     └────────────┘ └────────────┘│     │
-              │                                  │     │
-              └──────────────────────────────────┘     │
-                                                       │
-              ┌────────────────────────────────────────┘
-              │
-              ▼
-   ┌─────────────────────────────────┐
-   │ For .NET: Use Isolated Worker   │
-   │ (not In-Process)                │
-   └─────────────────────────────────┘
+```mermaid
+flowchart TD
+    Start["New Durable Project"] --> Q1{"Do you need serverless?<br/>(auto-scaling, pay-per-use)"}
+    
+    Q1 -->|Yes| AF["Azure Durable<br/>Functions"]
+    Q1 -->|No| Q2{"Running on<br/>Containers/K8s?"}
+    
+    Q2 -->|Yes| SDK["Durable Task SDKs"]
+    Q2 -->|No| Either["Either Option"]
+    
+    AF --> Note["For .NET: Use Isolated Worker<br/>(not In-Process)"]
+    SDK --> Note
+    Either --> Note
 ```
 
 ---
