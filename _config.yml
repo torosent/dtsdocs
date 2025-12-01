@@ -38,12 +38,6 @@ back_to_top_text: "Back to top"
 # Heading anchor links
 heading_anchors: true
 
-# External navigation links
-nav_external_links:
-  - title: Azure Functions Docs
-    url: https://learn.microsoft.com/azure/azure-functions/durable/
-    hide_icon: false
-
 # Collections for documentation
 collections:
   docs:

@@ -203,6 +203,7 @@ public async Task<string> SafeOrchestrator(TaskOrchestrationContext context)
 - **[Versioning](./versioning.md)** — Strategies for updating orchestration code
 - **[Performance & Scale](./performance-scale.md)** — Scaling behavior and high availability
 - **[Storage Providers](../durable-functions/storage-providers.md)** — Choose the right backend (Azure Storage, MSSQL, Netherite)
+- **[Framework vs SDKs](./framework-vs-sdk.md)** — Understand the difference between the engine and the client libraries
 
 ---
 
