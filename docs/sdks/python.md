@@ -1,0 +1,541 @@
+---
+layout: default
+title: Python SDK
+parent: Durable Task SDKs
+nav_order: 3
+permalink: /docs/sdks/python/
+---
+
+# Python Durable Task SDK
+{: .no_toc }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
+The Python Durable Task SDK enables building durable, reliable orchestrations using familiar Python syntax and async/await patterns.
+
+---
+
+## Installation
+
+### pip
+
+```bash
+pip install durabletask-azuremanaged
+```
+
+### Requirements
+
+- Python 3.10 or later
+- asyncio support
+
+---
+
+## Basic Setup
+
+### Worker Configuration
+
+```python
+import asyncio
+from durabletask import worker
+from durabletask.azuremanaged.worker import DurableTaskSchedulerWorker, DurableTaskSchedulerWorkerOptions
+
+# Define activities and orchestrators first (see below)
+
+async def main():
+    # Configure the worker
+    options = DurableTaskSchedulerWorkerOptions(
+        host="your-scheduler.centralus.durabletask.io",
+        secure_channel=True,
+        taskhub="default"
+    )
+    
+    async with DurableTaskSchedulerWorker(
+        options=options,
+        orchestrators=[order_processing_orchestrator],
+        activities=[validate_order, process_payment, ship_order]
+    ) as worker:
+        await worker.start()
+        print("Worker started. Press Ctrl+C to stop.")
+        
+        # Keep worker running
+        try:
+            await asyncio.Event().wait()
+        except KeyboardInterrupt:
+            pass
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+---
+
+## Defining Orchestrators
+
+### Basic Orchestrator
+
+```python
+from durabletask import task
+
+@task.orchestrator
+def order_processing_orchestrator(ctx: task.OrchestrationContext, order: dict):
+    """Process an order through multiple steps."""
+    
+    # Step 1: Validate the order
+    is_valid = yield ctx.call_activity("validate_order", input=order)
+    
+    if not is_valid:
+        return {"success": False, "message": "Invalid order"}
+    
+    # Step 2: Process payment
+    payment_result = yield ctx.call_activity(
+        "process_payment", 
+        input=order["payment"]
+    )
+    
+    # Step 3: Ship the order
+    yield ctx.call_activity("ship_order", input=order)
+    
+    return {
+        "success": True,
+        "order_id": order["id"],
+        "transaction_id": payment_result["transaction_id"]
+    }
+```
+
+### Generator Syntax
+
+Orchestrators in Python use generator syntax with `yield`:
+
+```python
+@task.orchestrator
+def hello_cities_orchestrator(ctx: task.OrchestrationContext, _):
+    """Say hello to multiple cities."""
+    
+    results = []
+    
+    # Sequential execution
+    results.append((yield ctx.call_activity("say_hello", input="Tokyo")))
+    results.append((yield ctx.call_activity("say_hello", input="London")))
+    results.append((yield ctx.call_activity("say_hello", input="Seattle")))
+    
+    return " ".join(results)
+```
+
+---
+
+## Defining Activities
+
+### Basic Activity
+
+```python
+from durabletask import task
+
+@task.activity
+def validate_order(ctx: task.ActivityContext, order: dict) -> bool:
+    """Validate an order."""
+    
+    # Perform validation logic
+    if not order.get("items"):
+        return False
+    
+    if order.get("total", 0) <= 0:
+        return False
+    
+    return True
+```
+
+### Async Activity
+
+```python
+@task.activity
+async def process_payment(ctx: task.ActivityContext, payment: dict) -> dict:
+    """Process payment asynchronously."""
+    
+    # Simulate async payment processing
+    await asyncio.sleep(1)
+    
+    return {
+        "transaction_id": f"txn_{payment['amount']}",
+        "status": "completed"
+    }
+```
+
+### Activity with Logging
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+@task.activity
+def ship_order(ctx: task.ActivityContext, order: dict) -> dict:
+    """Ship an order and return tracking info."""
+    
+    logger.info(f"Shipping order {order['id']} to {order['address']}")
+    
+    # Perform shipping logic
+    tracking_number = f"TRACK-{order['id']}-{ctx.task_id}"
+    
+    logger.info(f"Order shipped with tracking: {tracking_number}")
+    
+    return {
+        "tracking_number": tracking_number,
+        "carrier": "FastShip"
+    }
+```
+
+---
+
+## Using the Client
+
+### Create a Client
+
+```python
+from durabletask.azuremanaged.client import DurableTaskSchedulerClient
+
+client = DurableTaskSchedulerClient(
+    host="your-scheduler.centralus.durabletask.io",
+    secure_channel=True,
+    taskhub="default"
+)
+```
+
+### Schedule an Orchestration
+
+```python
+# Start a new orchestration
+instance_id = await client.schedule_new_orchestration(
+    orchestrator=order_processing_orchestrator,
+    input={"id": "order-123", "items": [...], "total": 99.99}
+)
+
+print(f"Started orchestration: {instance_id}")
+```
+
+### Wait for Completion
+
+```python
+from datetime import timedelta
+
+# Wait for completion with timeout
+result = await client.wait_for_orchestration_completion(
+    instance_id,
+    timeout=timedelta(seconds=60)
+)
+
+print(f"Status: {result.runtime_status}")
+print(f"Output: {result.serialized_output}")
+```
+
+### Query Status
+
+```python
+# Get orchestration status
+metadata = await client.get_orchestration_metadata(instance_id)
+
+print(f"Instance ID: {metadata.instance_id}")
+print(f"Status: {metadata.runtime_status}")
+print(f"Created: {metadata.created_at}")
+print(f"Last Updated: {metadata.last_updated_at}")
+```
+
+### Raise an Event
+
+```python
+# Send an event to a waiting orchestration
+await client.raise_orchestration_event(
+    instance_id,
+    event_name="ApprovalReceived",
+    data={"approved": True, "approved_by": "manager@example.com"}
+)
+```
+
+### Terminate an Orchestration
+
+```python
+await client.terminate_orchestration(instance_id, reason="Cancelled by user")
+```
+
+---
+
+## Advanced Patterns
+
+### Fan-Out/Fan-In
+
+```python
+@task.orchestrator
+def fan_out_fan_in_orchestrator(ctx: task.OrchestrationContext, work_items: list):
+    """Process multiple work items in parallel."""
+    
+    # Fan out - create tasks for all items
+    parallel_tasks = []
+    for item in work_items:
+        task = ctx.call_activity("process_item", input=item)
+        parallel_tasks.append(task)
+    
+    # Fan in - wait for all to complete
+    results = yield task.when_all(parallel_tasks)
+    
+    return results
+```
+
+### Sub-Orchestrations
+
+```python
+@task.orchestrator
+def parent_orchestrator(ctx: task.OrchestrationContext, order: dict):
+    """Parent orchestration that calls child orchestrators."""
+    
+    # Call a sub-orchestration
+    shipping_result = yield ctx.call_sub_orchestrator(
+        orchestrator=shipping_orchestrator,
+        input={"order_id": order["id"], "address": order["address"]}
+    )
+    
+    return {
+        "order_id": order["id"],
+        "tracking": shipping_result["tracking_number"]
+    }
+```
+
+### Durable Timers
+
+```python
+from datetime import timedelta
+
+@task.orchestrator
+def timer_orchestrator(ctx: task.OrchestrationContext, _):
+    """Orchestration with a timer delay."""
+    
+    # Wait for 24 hours
+    yield ctx.create_timer(timedelta(hours=24))
+    
+    # Continue after the delay
+    yield ctx.call_activity("send_reminder", input="Timer completed!")
+    
+    return "Done"
+```
+
+### External Events
+
+```python
+from datetime import timedelta
+
+@task.orchestrator
+def approval_orchestrator(ctx: task.OrchestrationContext, request: dict):
+    """Wait for human approval with timeout."""
+    
+    # Send approval request
+    yield ctx.call_activity("send_approval_request", input=request)
+    
+    # Wait for approval event with 24 hour timeout
+    approval_event = ctx.wait_for_external_event("ApprovalReceived")
+    timeout_event = ctx.create_timer(timedelta(hours=24))
+    
+    # Wait for either approval or timeout
+    winner = yield task.when_any([approval_event, timeout_event])
+    
+    if winner == approval_event:
+        approval = yield approval_event
+        return {"approved": approval.get("approved", False)}
+    else:
+        return {"approved": False, "reason": "Timeout"}
+```
+
+### Retry Policies
+
+```python
+from durabletask import task
+
+@task.orchestrator
+def retry_orchestrator(ctx: task.OrchestrationContext, input_data: dict):
+    """Orchestration with retry logic."""
+    
+    retry_policy = task.RetryPolicy(
+        max_number_of_attempts=5,
+        first_retry_interval=timedelta(seconds=1),
+        backoff_coefficient=2.0,
+        max_retry_interval=timedelta(minutes=1)
+    )
+    
+    result = yield ctx.call_activity(
+        "unreliable_activity",
+        input=input_data,
+        retry_policy=retry_policy
+    )
+    
+    return result
+```
+
+---
+
+## Error Handling
+
+### Try/Except in Orchestrators
+
+```python
+@task.orchestrator
+def error_handling_orchestrator(ctx: task.OrchestrationContext, order: dict):
+    """Handle errors gracefully."""
+    
+    try:
+        result = yield ctx.call_activity("risky_operation", input=order)
+        return {"success": True, "result": result}
+    except Exception as e:
+        # Log or handle the error
+        yield ctx.call_activity("log_error", input=str(e))
+        return {"success": False, "error": str(e)}
+```
+
+### Activity Error Handling
+
+```python
+@task.activity
+def risky_operation(ctx: task.ActivityContext, data: dict):
+    """Activity that might fail."""
+    
+    if not data.get("required_field"):
+        raise ValueError("Missing required field")
+    
+    # Perform operation
+    return {"processed": True}
+```
+
+---
+
+## Complete Example
+
+```python
+import asyncio
+from datetime import timedelta
+from durabletask import task
+from durabletask.azuremanaged.worker import DurableTaskSchedulerWorker, DurableTaskSchedulerWorkerOptions
+from durabletask.azuremanaged.client import DurableTaskSchedulerClient
+
+# Define activities
+@task.activity
+def get_work_items(ctx: task.ActivityContext, batch_id: str) -> list:
+    return [
+        {"id": f"{batch_id}-1", "data": "item1"},
+        {"id": f"{batch_id}-2", "data": "item2"},
+        {"id": f"{batch_id}-3", "data": "item3"},
+    ]
+
+@task.activity
+def process_item(ctx: task.ActivityContext, item: dict) -> dict:
+    return {"id": item["id"], "status": "processed"}
+
+@task.activity
+def aggregate_results(ctx: task.ActivityContext, results: list) -> dict:
+    return {"total": len(results), "items": results}
+
+# Define orchestrator
+@task.orchestrator
+def batch_processing_orchestrator(ctx: task.OrchestrationContext, batch_id: str):
+    # Get work items
+    items = yield ctx.call_activity("get_work_items", input=batch_id)
+    
+    # Process items in parallel (fan-out)
+    tasks = [ctx.call_activity("process_item", input=item) for item in items]
+    results = yield task.when_all(tasks)
+    
+    # Aggregate results (fan-in)
+    summary = yield ctx.call_activity("aggregate_results", input=results)
+    
+    return summary
+
+# Main function
+async def main():
+    options = DurableTaskSchedulerWorkerOptions(
+        host="your-scheduler.centralus.durabletask.io",
+        secure_channel=True,
+        taskhub="default"
+    )
+    
+    # Start worker in background
+    async with DurableTaskSchedulerWorker(
+        options=options,
+        orchestrators=[batch_processing_orchestrator],
+        activities=[get_work_items, process_item, aggregate_results]
+    ) as worker:
+        await worker.start()
+        
+        # Create client and start orchestration
+        client = DurableTaskSchedulerClient(
+            host="your-scheduler.centralus.durabletask.io",
+            secure_channel=True,
+            taskhub="default"
+        )
+        
+        instance_id = await client.schedule_new_orchestration(
+            orchestrator=batch_processing_orchestrator,
+            input="batch-001"
+        )
+        
+        print(f"Started: {instance_id}")
+        
+        # Wait for completion
+        result = await client.wait_for_orchestration_completion(
+            instance_id,
+            timeout=timedelta(seconds=60)
+        )
+        
+        print(f"Result: {result.serialized_output}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+---
+
+## Authentication
+
+### Using Managed Identity
+
+```python
+from azure.identity import DefaultAzureCredential
+
+credential = DefaultAzureCredential()
+
+worker = DurableTaskSchedulerWorker(
+    options=DurableTaskSchedulerWorkerOptions(
+        host="your-scheduler.centralus.durabletask.io",
+        secure_channel=True,
+        taskhub="default",
+        credential=credential
+    ),
+    orchestrators=[...],
+    activities=[...]
+)
+```
+
+### Using User-Assigned Managed Identity
+
+```python
+from azure.identity import ManagedIdentityCredential
+
+credential = ManagedIdentityCredential(
+    client_id="your-managed-identity-client-id"
+)
+
+client = DurableTaskSchedulerClient(
+    host="your-scheduler.centralus.durabletask.io",
+    secure_channel=True,
+    taskhub="default",
+    credential=credential
+)
+```
+
+---
+
+## Next Steps
+
+- [View Python Samples →](../samples/python/index.md)
+- [Deploy to Azure Container Apps →](../architecture/aca-dts.md)
+- [Explore Patterns →](../patterns/index.md)
