@@ -214,6 +214,33 @@ public static async Task PeriodicCleanup(
 
 ---
 
+## Data Persistence & Serialization
+
+The Durable Task Framework automatically handles the serialization and persistence of all data passed between functions.
+
+### Serialization
+
+- **Inputs & Outputs**: All inputs to orchestrators/activities and all outputs returned by them are serialized to JSON.
+- **Exceptions**: Exceptions thrown by activities are also serialized and can be caught in the orchestrator.
+- **Custom Types**: You can use custom classes/records, provided they are JSON-serializable.
+
+> **Note**: Circular references in objects will cause serialization failures.
+
+### Data Storage
+
+Serialized data is stored in the configured storage backend.
+
+- **Small Payloads**: Stored directly in the orchestration history (e.g., Azure Table Storage).
+- **Large Payloads**: Automatically offloaded to blob storage (if supported by the provider) to avoid hitting size limits. The history then contains a reference (URL) to the blob.
+
+### Best Practices
+
+1. **Keep Payloads Small**: Large payloads increase latency and storage costs.
+2. **Use References**: Instead of passing a 10MB file content, pass a URL to where the file is stored.
+3. **Versioning**: Be careful when changing the structure of custom types used in inputs/outputs, as this can break replay for in-flight instances.
+
+---
+
 ## Durability Guarantees
 
 ### Exactly-Once Orchestrator Execution

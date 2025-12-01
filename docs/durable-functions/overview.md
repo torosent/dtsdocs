@@ -156,7 +156,7 @@ public static async Task<HttpResponseData> StartOrder(
 
 ## Storage Backend Options
 
-Durable Functions supports multiple storage backends:
+Durable Functions supports multiple storage backends. [Learn more about Storage Providers](./storage-providers.md).
 
 ### Durable Task Scheduler (Recommended)
 

@@ -197,6 +197,12 @@ public async Task<string> SafeOrchestrator(TaskOrchestrationContext context)
 - **[Activities](./activities.md)** — Understand how activities perform the actual work
 - **[Entities](./entities.md)** — Explore stateful entities for managing distributed state
 - **[State Management](./state-management.md)** — Deep dive into how state is persisted and recovered
+- **[Error Handling](./error-handling.md)** — Handle exceptions, retries, and compensation
+- **[Task Hubs](./task-hubs.md)** — Logical containers for isolation and management
+- **[Instance Management](./instance-management.md)** — Start, query, terminate, and purge instances
+- **[Versioning](./versioning.md)** — Strategies for updating orchestration code
+- **[Performance & Scale](./performance-scale.md)** — Scaling behavior and high availability
+- **[Storage Providers](../durable-functions/storage-providers.md)** — Choose the right backend (Azure Storage, MSSQL, Netherite)
 
 ---
 

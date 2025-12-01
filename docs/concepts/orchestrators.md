@@ -243,6 +243,20 @@ var approval = await context.WaitForExternalEvent<bool>("ApprovalEvent");
 approval = yield context.wait_for_external_event("ApprovalEvent")
 ```
 
+### Custom Orchestration Status
+
+You can set a custom status value for your orchestration that can be queried externally. This is useful for providing progress updates (e.g., "Processing item 5 of 10", "Waiting for approval").
+
+```csharp
+// C#
+context.SetCustomStatus(new { Progress = 50, Message = "Halfway there" });
+```
+
+```python
+# Python
+context.set_custom_status({"progress": 50, "message": "Halfway there"})
+```
+
 ### Retry Policies
 
 Add automatic retries for activities:
